@@ -126,8 +126,8 @@ def load_checkpoint(model, optimizer, checkpoint_path):
         return 0
 
 if __name__ == '__main__':
-    charges = [-0.82, 0.41]
-    LJ_params = [(0.155, 3.165), (0, 0)]
+    charges = [None, -0.82, 0.41]
+    LJ_params = [None, (0.155, 3.165), (0, 0)]
     files = [f'data/N216.{i}.lammpstrj' for i in range(1, 101)]
     data = read_data(files)
     print('Data read')
