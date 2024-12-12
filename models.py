@@ -67,7 +67,7 @@ class MPLayer(MessagePassing):
         return accumulated_message
 
     def message(self, v_i, v_j, e):
-        return self.mlp(torch.cat([v_i + v_j, e], dim=-1))
+        return self.mlp(torch.cat([v_i - v_j, e], dim=-1))
         #return self.mlp(v_i + v_j + e)
 
 class GNN(torch.nn.Module):

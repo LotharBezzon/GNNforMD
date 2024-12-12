@@ -212,7 +212,7 @@ if __name__ == '__main__':
     data = read_data(files)
     print('Data read')
     
-    graphs = make_graphs(data, charges, LJ_params, cutoff=3.0)
+    graphs = make_graphs(data, charges, LJ_params, cutoff=3.5)
     print(len(graphs))
     print('Graphs made')
 
@@ -225,7 +225,7 @@ if __name__ == '__main__':
     print('Data loaded')
 
     model = GNN(3, 7, 3).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+    optimizer = torch.optim.Adam(model.parameters(), lr=2e-3)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.5)
     lossFunc = torch.nn.L1Loss(reduction='sum')
 
@@ -235,7 +235,7 @@ if __name__ == '__main__':
     test_losses = []
     train_losses = []
     for epoch in range(start_epoch + 1, 60):
-        loss = train(model, optimizer, train_loader, lossFunc, clip_value=1.0)
+        loss = train(model, optimizer, train_loader, lossFunc)
         test_loss = test(model, test_loader, lossFunc)
         test_losses.append(test_loss)
         train_losses.append(loss)
