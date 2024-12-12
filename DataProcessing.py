@@ -9,6 +9,8 @@ def read_data(files, molecular=True):
 
     Args:
         files (list of str): List of file paths to LAMMPS trajectory files.
+        molecular (bool): False if the material is monoatomic. Default True.
+
 
     Returns:
         list of dict: A list of dictionaries, each containing information about a frame.
@@ -96,7 +98,7 @@ def minimum_image_distance(coords1, coords2, box_size):
 def make_graphs(data, charges, LJ_params, cutoff):
     """
     Build graphs for a GNN architecture from the given data.
-    Nodes represent atoms and their feature is the atom type. Nodes closer than 2.3 are connected.
+    Nodes represent atoms and their feature is the atom type. Nodes closer than cutoff are connected.
     Edge attributes contain the distance between the two atoms and informations about the bond type.
     The targets are the three force components acting on each atom. The forces are normalized.
 
@@ -117,6 +119,9 @@ def make_graphs(data, charges, LJ_params, cutoff):
                                        - 'fx': Force in the x-direction.
                                        - 'fy': Force in the y-direction.
                                        - 'fz': Force in the z-direction.
+        charges (list or dict): charge or partial charge of each atom type.
+        LJ_params (list or dict): Lennard-Jones potentials (\u03B5 and \u03C3) for each atom type.
+        cutoff (float): cutoff radius for edges length.
 
     Returns:
         list of torch_geometric.data.Data: List of graph data objects for the GNN architecture.
