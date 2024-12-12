@@ -132,7 +132,7 @@ if __name__ == '__main__':
     data = read_data(files)
     print('Data read')
     
-    graphs = make_graphs(data, charges, LJ_params)
+    graphs = make_graphs(data, charges, LJ_params, cutoff=3.0)
     print(len(graphs))
     print('Graphs made')
 
@@ -150,7 +150,7 @@ if __name__ == '__main__':
     lossFunc = torch.nn.L1Loss(reduction='sum')
 
     # Load from checkpoint if available
-    start_epoch = load_checkpoint(model, optimizer, 'checkpoints/universal_nodes_epoch_5.pth')
+    start_epoch = load_checkpoint(model, optimizer, 'checkpoints/big_decoder_epoch_5.pth')
 
     test_losses = []
     train_losses = []

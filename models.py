@@ -40,17 +40,17 @@ class MPLayer(MessagePassing):
         #return self.mlp(v_i + v_j + e)
 
 class GNN(torch.nn.Module):
-    def __init__(self, node_dim, edge_dim, out_dim, embedding_dim=128, mp_num=4):
+    def __init__(self, node_dim, edge_dim, out_dim, embedding_dim=64, mp_num=3):
         super().__init__()
         torch.manual_seed(12345)
-        self.node_encoder = mlp(node_dim, embedding_dim)
-        self.edge_encoder = mlp(edge_dim, embedding_dim)
+        self.node_encoder = mlp(node_dim, embedding_dim, hidden_num=1)
+        self.edge_encoder = mlp(edge_dim, embedding_dim, hidden_num=1)
         self.message_passing_layers = ModuleList()
         self.norm_layer = BatchNorm1d(embedding_dim)
         for _ in range(mp_num):
             self.message_passing_layers.append(BatchNorm1d(embedding_dim))
             self.message_passing_layers.append(MPLayer(embedding_dim, embedding_dim))
-        self.decoder = mlp(embedding_dim, out_dim)
+        self.decoder = mlp(embedding_dim, out_dim, hidden_num=5)
         
         
     def forward(self, data):

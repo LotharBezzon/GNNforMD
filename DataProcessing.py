@@ -3,7 +3,7 @@ from torch_geometric.data import Data
 import torch
 import torch.nn.functional as Func
 
-def read_data(files):
+def read_data(files, molecular=True):
     """
     Reads data from a list of LAMMPS trajectory files and extracts atom information.
 
@@ -50,16 +50,20 @@ def read_data(files):
                     atoms = []
                     for _ in range(atom_number):
                         atom_data = next(lines).split()
+                        if molecular:
+                            i = 0
+                        else:
+                            i = 1
                         atom = {
                             'id': int(atom_data[0]) - 1, # 0-based indexing
-                            'mol': int(atom_data[1]),
-                            'type': int(atom_data[2]),
-                            'x': float(atom_data[3]),
-                            'y': float(atom_data[4]),
-                            'z': float(atom_data[5]),
-                            'fx': float(atom_data[6]),
-                            'fy': float(atom_data[7]),
-                            'fz': float(atom_data[8])
+                            'mol': int(atom_data[1-i]), # if molecular mol id equal atom id
+                            'type': int(atom_data[2-i]),
+                            'x': float(atom_data[3-i]),
+                            'y': float(atom_data[4-i]),
+                            'z': float(atom_data[5-i]),
+                            'fx': float(atom_data[6-i]),
+                            'fy': float(atom_data[7-i]),
+                            'fz': float(atom_data[8-i])
                         }
                         atoms.append(atom)
                     file_data.append({'timestep': timestep, 'num_atoms': atom_number, 'box_size': box_size, 'atoms': atoms})
@@ -89,7 +93,7 @@ def minimum_image_distance(coords1, coords2, box_size):
     return delta, distance
 
 # Build graphs for a SchNet architecture
-def make_graphs(data, charges, LJ_params):
+def make_graphs(data, charges, LJ_params, cutoff):
     """
     Build graphs for a GNN architecture from the given data.
     Nodes represent atoms and their feature is the atom type. Nodes closer than 2.3 are connected.
@@ -141,7 +145,7 @@ def make_graphs(data, charges, LJ_params):
         dist_coords, dist_mod = minimum_image_distance(positions[start_nodes], positions[end_nodes], frame['box_size'])
         
         # Filter out edges with distances greater than 2.3
-        mask = dist_mod <= 2.3
+        mask = dist_mod < cutoff
         edge_index = edge_index[:, mask]
         dist_mod = dist_mod[mask]
         dist_coords = dist_coords[mask]
