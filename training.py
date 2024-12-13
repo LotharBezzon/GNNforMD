@@ -213,11 +213,23 @@ def load_checkpoint(model, optimizer, checkpoint_path):
     else:
         print(f'No checkpoint found at {checkpoint_path}')
         return 0
+    
+def warmup_learning_rate(optimizer, warmup_steps, initial_lr):
+    """
+    Gradually increases the learning rate from a small value to the initial learning rate.
+
+    Args:
+        optimizer (torch.optim.Optimizer): The optimizer to adjust the learning rate for.
+        warmup_steps (int): Number of warm-up steps.
+        initial_lr (float): The initial learning rate.
+    """
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = initial_lr * (epoch / warmup_steps)
 
 if __name__ == '__main__':
     charges = [None, -0.82, 0.41]
     LJ_params = [None, (0.155, 3.165), (0, 0)]
-    files = [f'data/N216.{i}.lammpstrj' for i in range(1, 11)]
+    files = [f'data/N216.{i}.lammpstrj' for i in range(1, 101)]
     data = read_data(files)
     print('Data read')
     
@@ -234,16 +246,20 @@ if __name__ == '__main__':
     print('Data loaded')
 
     model = GNN(3, 7, 3).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=2e-3)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.8)
+    initial_lr = 1e-3
+    optimizer = torch.optim.Adam(model.parameters(), lr=initial_lr)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.6)
     lossFunc = torch.nn.L1Loss(reduction='sum')
 
     # Load from checkpoint if available
     start_epoch = load_checkpoint(model, optimizer, 'checkpoints/big_decoder_epoch_5.pth')
-
+    warmup_steps = 5
     test_losses = []
     train_losses = []
-    for epoch in range(start_epoch + 1, 60):
+    for epoch in range(start_epoch + 1, 80):
+        if epoch <= warmup_steps:
+            warmup_learning_rate(optimizer, warmup_steps, initial_lr)
+    
         loss = train(model, optimizer, train_loader, lossFunc)
         test_loss, lossx, lossy, lossz = test(model, test_loader, lossFunc)
         test_losses.append(test_loss)
@@ -251,7 +267,14 @@ if __name__ == '__main__':
         current_lr = optimizer.param_groups[0]['lr']
         print(f'Epoch: {epoch:02d}, Train Loss: {loss:.4f}, Test Loss: {test_loss:.4f}, LR: {current_lr*10**7:.2f}*10^(-7)')
         print(f'Losses: x: {lossx:.4f}, y: {lossy:.4f}, z: {lossz:.4f}')
-        scheduler.step()
+
+        # Write to file
+        with open('training_log.txt', 'a') as f:
+            f.write(f'Epoch: {epoch:02d}, Train Loss: {loss:.4f}, Test Loss: {test_loss:.4f}, LR: {current_lr*10**7:.2f}*10^(-7)\n')
+            f.write(f'Losses: x: {lossx:.4f}, y: {lossy:.4f}, z: {lossz:.4f}\n')
+
+        if epoch >= warmup_steps:
+            scheduler.step()
 
         if epoch % 6 == 0:
             save_checkpoint(model, optimizer, epoch)
