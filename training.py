@@ -148,16 +148,25 @@ def test(model, loader, lossFunc):
     """
     model.eval()
     total_loss = 0
+    total_lossx = 0
+    total_lossy = 0
+    total_lossz = 0
     count = 0
     for data in loader:
         data = data.to(device)
         pred = model(data)
         loss = lossFunc(pred, data.y)
+        lossx = lossFunc(pred[:, 0], data.y[:, 0])
+        lossy = lossFunc(pred[:, 1], data.y[:, 1])
+        lossz = lossFunc(pred[:, 2], data.y[:, 2])
         count += 1
-        if count % 32 == 0:
+        if count % 3 == 0:
             print(pred[:5], data.y[:5])
         total_loss += loss.item()
-    return total_loss / len(loader.dataset)
+        total_lossx += lossx.item()
+        total_lossy += lossy.item()
+        total_lossz += lossz.item()
+    return total_loss / len(loader.dataset), total_lossx / len(loader.dataset), total_lossy / len(loader.dataset), total_lossz / len(loader.dataset)
 
 def save_checkpoint(model, optimizer, epoch, checkpoint_dir='checkpoints'):
     """
@@ -208,7 +217,7 @@ def load_checkpoint(model, optimizer, checkpoint_path):
 if __name__ == '__main__':
     charges = [None, -0.82, 0.41]
     LJ_params = [None, (0.155, 3.165), (0, 0)]
-    files = [f'data/N216.{i}.lammpstrj' for i in range(1, 101)]
+    files = [f'data/N216.{i}.lammpstrj' for i in range(1, 11)]
     data = read_data(files)
     print('Data read')
     
@@ -220,12 +229,12 @@ if __name__ == '__main__':
     test_length = int(len(graphs) / 10)
     train_graphs, test_graphs = graphs[:-test_length], graphs[-test_length:]
     batch_size = 32
-    train_loader = DataLoader(train_graphs, batch_size=batch_size)
+    train_loader = DataLoader(train_graphs, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_graphs, batch_size=batch_size)
     print('Data loaded')
 
     model = GNN(3, 7, 3).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=5e-4)
+    optimizer = torch.optim.Adam(model.parameters(), lr=2e-3)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.8)
     lossFunc = torch.nn.L1Loss(reduction='sum')
 
@@ -236,11 +245,12 @@ if __name__ == '__main__':
     train_losses = []
     for epoch in range(start_epoch + 1, 60):
         loss = train(model, optimizer, train_loader, lossFunc)
-        test_loss = test(model, test_loader, lossFunc)
+        test_loss, lossx, lossy, lossz = test(model, test_loader, lossFunc)
         test_losses.append(test_loss)
         train_losses.append(loss)
         current_lr = optimizer.param_groups[0]['lr']
         print(f'Epoch: {epoch:02d}, Train Loss: {loss:.4f}, Test Loss: {test_loss:.4f}, LR: {current_lr*10**7:.2f}*10^(-7)')
+        print(f'Losses: x: {lossx:.4f}, y: {lossy:.4f}, z: {lossz:.4f}')
         scheduler.step()
 
         if epoch % 6 == 0:
