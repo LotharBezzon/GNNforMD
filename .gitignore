@@ -1,6 +1,7 @@
 data/
 checkpoints/
 docs/
+GNNenv/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
