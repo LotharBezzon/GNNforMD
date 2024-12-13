@@ -174,7 +174,7 @@ def save_checkpoint(model, optimizer, epoch, checkpoint_dir='checkpoints'):
     """
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
-    checkpoint_path = os.path.join(checkpoint_dir, f'universal_nodes_epoch_{epoch}.pth')
+    checkpoint_path = os.path.join(checkpoint_dir, f'big_cutoff_epoch_{epoch}.pth')
     torch.save({
         'epoch': epoch,
         'model_state_dict': model.state_dict(),
@@ -225,8 +225,8 @@ if __name__ == '__main__':
     print('Data loaded')
 
     model = GNN(3, 7, 3).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=2e-3)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.5)
+    optimizer = torch.optim.Adam(model.parameters(), lr=5e-4)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.8)
     lossFunc = torch.nn.L1Loss(reduction='sum')
 
     # Load from checkpoint if available
