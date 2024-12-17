@@ -64,6 +64,13 @@ def rotate_graph(data, yaw, pitch, roll):
     y = torch.matmul(data.y, R.T)
     return Data(x=data.x, edge_index=data.edge_index, edge_attr=edge_attr, y=y)
 
+class warmup_loss(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, pred, target):
+        return torch.nn.functional.l1_loss(pred, target, reduction='sum') + 216*32 / torch.nn.functional.l1_loss(pred, torch.full_like(pred, 0), reduction='sum')
+
 class my_loss(torch.nn.Module):
     """
     Custom loss function module that combines L1 loss with a regularization loss.
@@ -84,7 +91,7 @@ class my_loss(torch.nn.Module):
         super().__init__()
     
     def forward(self, pred, target, atom_num, batch_size):
-        return torch.F.l1_loss(pred, target, reduction='sum') + regularization_loss(pred, atom_num, batch_size)
+        return torch.nn.functional.l1_loss(pred, target, reduction='sum') + regularization_loss(pred, atom_num, batch_size)
 
 def regularization_loss(pred, atom_num, batch_size):
     """
@@ -160,7 +167,7 @@ def test(model, loader, lossFunc):
         lossy = lossFunc(pred[:, 1], data.y[:, 1])
         lossz = lossFunc(pred[:, 2], data.y[:, 2])
         count += 1
-        if count % 3 == 0:
+        if count % 32 == 0:
             print(pred[:5], data.y[:5])
         total_loss += loss.item()
         total_lossx += lossx.item()
@@ -246,18 +253,19 @@ if __name__ == '__main__':
     print('Data loaded')
 
     model = GNN(3, 7, 3).to(device)
-    initial_lr = 1e-3
+    initial_lr = 3e-4
     optimizer = torch.optim.Adam(model.parameters(), lr=initial_lr)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.6)
-    lossFunc = torch.nn.L1Loss(reduction='sum')
 
     # Load from checkpoint if available
     start_epoch = load_checkpoint(model, optimizer, 'checkpoints/big_decoder_epoch_5.pth')
     warmup_steps = 5
     test_losses = []
     train_losses = []
-    for epoch in range(start_epoch + 1, 80):
+    for epoch in range(start_epoch + 1, 50):
+        lossFunc = torch.nn.L1Loss(reduction='sum')
         if epoch <= warmup_steps:
+            lossFunc = warmup_loss()
             warmup_learning_rate(optimizer, warmup_steps, initial_lr)
     
         loss = train(model, optimizer, train_loader, lossFunc)
