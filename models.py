@@ -1,7 +1,7 @@
 import torch
 from torch.nn import Sequential, Linear, GELU, BatchNorm1d, Dropout, LayerNorm, ReLU, ModuleList
 import torch.nn.functional as F
-from torch_geometric.nn import MessagePassing, GATConv
+from torch_geometric.nn import MessagePassing, GATConv, BatchNorm
 
 class mlp(torch.nn.Module):
     """
@@ -17,13 +17,15 @@ class mlp(torch.nn.Module):
     Attributes:
         mlp (torch.nn.Sequential): The sequential container of the MLP layers.
     """
-    def __init__(self, in_channels, out_channel, hidden_dim=128, hidden_num=3, activation=GELU()):
+    def __init__(self, in_channels, out_channel, hidden_dim=128, hidden_num=3, activation=GELU(), normalize=False):
         super().__init__()
-        #normalization = BatchNorm1d(in_channels)
+        normalization = BatchNorm(in_channels)
         self.layers = [Linear(in_channels, hidden_dim), activation]
         for _ in range(hidden_num):
             self.layers.append(Dropout(0.1))
             self.layers.append(Linear(hidden_dim, hidden_dim))
+            if normalize:
+                self.layers.append(normalization)
             self.layers.append(activation)
         self.layers.append(Linear(hidden_dim, out_channel))
         self.mlp = Sequential(*self.layers)
@@ -99,11 +101,11 @@ class GNN(torch.nn.Module):
         self.node_encoder = mlp(node_dim, embedding_dim, hidden_num=2)
         self.edge_encoder = mlp(edge_dim, embedding_dim, hidden_num=2)
         self.message_passing_layers = ModuleList()
-        self.norm_layer = BatchNorm1d(embedding_dim)
+        self.norm_layer = BatchNorm(embedding_dim)
         for _ in range(mp_num):
-            self.message_passing_layers.append(BatchNorm1d(embedding_dim))
+            self.message_passing_layers.append(BatchNorm(embedding_dim))
             self.message_passing_layers.append(MPLayer(embedding_dim, embedding_dim))
-        self.decoder = mlp(embedding_dim, out_dim, hidden_num=4)
+        self.decoder = mlp(embedding_dim, out_dim, hidden_num=4, normalize=True)
         
         
     def forward(self, data):

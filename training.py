@@ -253,7 +253,7 @@ if __name__ == '__main__':
     print('Data loaded')
 
     model = GNN(3, 7, 3).to(device)
-    initial_lr = 3e-4
+    initial_lr = 1e-3
     optimizer = torch.optim.Adam(model.parameters(), lr=initial_lr)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.6)
 
