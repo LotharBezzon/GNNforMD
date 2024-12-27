@@ -167,7 +167,7 @@ def test(model, loader, lossFunc):
         lossy = lossFunc(pred[:, 1], data.y[:, 1])
         lossz = lossFunc(pred[:, 2], data.y[:, 2])
         count += 1
-        if count % 32 == 0:
+        if count % 16 == 0:
             print(pred[:5], data.y[:5])
         total_loss += loss.item()
         total_lossx += lossx.item()
@@ -240,7 +240,7 @@ if __name__ == '__main__':
     data = read_data(files)
     print('Data read')
     
-    graphs = make_graphs(data, charges, LJ_params, cutoff=3.5)
+    graphs = make_graphs(data[:1000], charges, LJ_params, cutoff=3.5)
     print(len(graphs))
     print('Graphs made')
 
@@ -253,7 +253,7 @@ if __name__ == '__main__':
     print('Data loaded')
 
     model = GNN(3, 7, 3).to(device)
-    initial_lr = 1e-3
+    initial_lr = 5e-4
     optimizer = torch.optim.Adam(model.parameters(), lr=initial_lr)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.6)
 
@@ -276,7 +276,7 @@ if __name__ == '__main__':
         print(f'Epoch: {epoch:02d}, Train Loss: {loss:.4f}, Test Loss: {test_loss:.4f}, LR: {current_lr*10**7:.2f}*10^(-7)')
         print(f'Losses: x: {lossx:.4f}, y: {lossy:.4f}, z: {lossz:.4f}')
 
-        # Write to file
+        # Write log to file
         with open('training_log.txt', 'a') as f:
             f.write(f'Epoch: {epoch:02d}, Train Loss: {loss:.4f}, Test Loss: {test_loss:.4f}, LR: {current_lr*10**7:.2f}*10^(-7)\n')
             f.write(f'Losses: x: {lossx:.4f}, y: {lossy:.4f}, z: {lossz:.4f}\n')
