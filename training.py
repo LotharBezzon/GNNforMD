@@ -2,7 +2,7 @@ import torch
 from torch_geometric.loader import DataLoader
 from torch_geometric.data import Data
 from DataProcessing import read_data, make_graphs
-from models import GNN, GATModel
+from models import GNN, GATModel, equivariantGNN
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 import os
@@ -167,7 +167,7 @@ def test(model, loader, lossFunc):
         lossy = lossFunc(pred[:, 1], data.y[:, 1])
         lossz = lossFunc(pred[:, 2], data.y[:, 2])
         count += 1
-        if count % 16 == 0:
+        if count % 2 == 0:
             print(pred[:5], data.y[:5])
         total_loss += loss.item()
         total_lossx += lossx.item()
@@ -190,7 +190,7 @@ def save_checkpoint(model, optimizer, epoch, checkpoint_dir='checkpoints'):
     """
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
-    checkpoint_path = os.path.join(checkpoint_dir, f'big_cutoff_epoch_{epoch}.pth')
+    checkpoint_path = os.path.join(checkpoint_dir, f'equivariant_epoch_{epoch}.pth')
     torch.save({
         'epoch': epoch,
         'model_state_dict': model.state_dict(),
@@ -247,15 +247,15 @@ if __name__ == '__main__':
     np.random.shuffle(graphs)
     test_length = int(len(graphs) / 10)
     train_graphs, test_graphs = graphs[:-test_length], graphs[-test_length:]
-    batch_size = 32
+    batch_size = 16
     train_loader = DataLoader(train_graphs, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_graphs, batch_size=batch_size)
     print('Data loaded')
 
-    model = GNN(3, 7, 3).to(device)
-    initial_lr = 5e-4
+    model = equivariantGNN().to(device)
+    initial_lr = 1e-3
     optimizer = torch.optim.Adam(model.parameters(), lr=initial_lr)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.6)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.5)
 
     # Load from checkpoint if available
     start_epoch = load_checkpoint(model, optimizer, 'checkpoints/big_decoder_epoch_5.pth')

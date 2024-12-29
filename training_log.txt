@@ -70,3 +70,135 @@ Epoch: 03, Train Loss: 11767.7504, Test Loss: 11414.2436, LR: 3000.00*10^(-7)
 Losses: x: 3814.4624, y: 3826.7549, z: 3773.1946
 Epoch: 04, Train Loss: 11726.7080, Test Loss: 11378.1915, LR: 4000.00*10^(-7)
 Losses: x: 3802.5556, y: 3816.4218, z: 3759.3490
+Epoch: 01, Train Loss: 17131.2212, Test Loss: 17114.2237, LR: 2000.00*10^(-7)
+Losses: x: 5699.6612, y: 5709.9746, z: 5705.0386
+Epoch: 02, Train Loss: 17112.8314, Test Loss: 17259.9302, LR: 4000.00*10^(-7)
+Losses: x: 5716.4027, y: 5762.0496, z: 5781.5065
+Epoch: 03, Train Loss: 15000.2664, Test Loss: 10048.6916, LR: 6000.00*10^(-7)
+Losses: x: 3567.6390, y: 2994.7699, z: 3486.2872
+Epoch: 04, Train Loss: 7306.7332, Test Loss: 6927.9047, LR: 8000.00*10^(-7)
+Losses: x: 2372.6536, y: 2263.2821, z: 2291.9723
+Epoch: 05, Train Loss: 6047.1074, Test Loss: 6521.2382, LR: 10000.00*10^(-7)
+Losses: x: 2248.1663, y: 2071.6712, z: 2201.4043
+Epoch: 06, Train Loss: 5500.8761, Test Loss: 3985.4818, LR: 10000.00*10^(-7)
+Losses: x: 1308.7359, y: 1275.7039, z: 1401.0420
+Epoch: 07, Train Loss: 5215.7034, Test Loss: 3649.1225, LR: 10000.00*10^(-7)
+Losses: x: 1215.9295, y: 1189.8223, z: 1243.3707
+Epoch: 08, Train Loss: 4963.8225, Test Loss: 3760.1908, LR: 6000.00*10^(-7)
+Losses: x: 1319.8231, y: 1119.1097, z: 1321.2580
+Epoch: 09, Train Loss: 4832.4207, Test Loss: 5830.9486, LR: 6000.00*10^(-7)
+Losses: x: 1995.8526, y: 1868.2062, z: 1966.8898
+Epoch: 10, Train Loss: 4775.6807, Test Loss: 4194.4854, LR: 6000.00*10^(-7)
+Losses: x: 1421.1156, y: 1340.8417, z: 1432.5281
+Epoch: 11, Train Loss: 4632.2342, Test Loss: 3390.5006, LR: 3600.00*10^(-7)
+Losses: x: 1132.6005, y: 1110.2241, z: 1147.6761
+Epoch: 12, Train Loss: 4577.5710, Test Loss: 4257.5045, LR: 3600.00*10^(-7)
+Losses: x: 1425.9135, y: 1363.7894, z: 1467.8016
+Epoch: 13, Train Loss: 4521.8881, Test Loss: 3788.7937, LR: 3600.00*10^(-7)
+Losses: x: 1285.5598, y: 1181.8082, z: 1321.4258
+Epoch: 14, Train Loss: 4460.5477, Test Loss: 3327.4017, LR: 2160.00*10^(-7)
+Losses: x: 1140.2543, y: 1023.9737, z: 1163.1737
+Epoch: 15, Train Loss: 4423.5304, Test Loss: 3771.0451, LR: 2160.00*10^(-7)
+Losses: x: 1269.9401, y: 1200.5364, z: 1300.5685
+Epoch: 16, Train Loss: 4399.8371, Test Loss: 3412.8852, LR: 2160.00*10^(-7)
+Losses: x: 1154.7087, y: 1048.7564, z: 1209.4202
+Epoch: 17, Train Loss: 4363.6244, Test Loss: 3654.7504, LR: 1296.00*10^(-7)
+Losses: x: 1228.3533, y: 1143.8596, z: 1282.5375
+Epoch: 18, Train Loss: 4342.1476, Test Loss: 3509.4098, LR: 1296.00*10^(-7)
+Losses: x: 1182.9342, y: 1099.0379, z: 1227.4377
+Epoch: 19, Train Loss: 4323.6257, Test Loss: 4158.3961, LR: 1296.00*10^(-7)
+Losses: x: 1409.8001, y: 1310.8193, z: 1437.7767
+Epoch: 20, Train Loss: 4301.1557, Test Loss: 3450.2227, LR: 777.60*10^(-7)
+Losses: x: 1164.9060, y: 1089.0902, z: 1196.2265
+Epoch: 21, Train Loss: 4286.4464, Test Loss: 3573.6334, LR: 777.60*10^(-7)
+Losses: x: 1214.3896, y: 1104.6979, z: 1254.5459
+Epoch: 22, Train Loss: 4277.8968, Test Loss: 3961.7253, LR: 777.60*10^(-7)
+Losses: x: 1339.6345, y: 1235.9575, z: 1386.1333
+Epoch: 23, Train Loss: 4262.7801, Test Loss: 3394.8001, LR: 466.56*10^(-7)
+Losses: x: 1153.8740, y: 1046.5319, z: 1194.3942
+Epoch: 24, Train Loss: 4252.0227, Test Loss: 3754.4086, LR: 466.56*10^(-7)
+Losses: x: 1270.4007, y: 1176.7562, z: 1307.2518
+Epoch: 25, Train Loss: 4242.8826, Test Loss: 3682.1729, LR: 466.56*10^(-7)
+Losses: x: 1255.7724, y: 1131.0240, z: 1295.3765
+Epoch: 26, Train Loss: 4236.0856, Test Loss: 3548.3863, LR: 279.94*10^(-7)
+Losses: x: 1207.5047, y: 1097.2153, z: 1243.6664
+Epoch: 01, Train Loss: 17107.6568, Test Loss: 16831.7621, LR: 16000.00*10^(-7)
+Losses: x: 5612.8088, y: 5547.5518, z: 5671.4295
+Epoch: 02, Train Loss: 12938.7032, Test Loss: 9661.7328, LR: 32000.00*10^(-7)
+Losses: x: 1995.3389, y: 1961.2974, z: 5705.2014
+Epoch: 03, Train Loss: 10119.0755, Test Loss: 8916.1684, LR: 48000.00*10^(-7)
+Losses: x: 1631.9773, y: 1579.4892, z: 5704.7799
+Epoch: 04, Train Loss: 9583.3497, Test Loss: 9496.9431, LR: 64000.00*10^(-7)
+Losses: x: 1787.1906, y: 2000.4888, z: 5709.3037
+Epoch: 05, Train Loss: 9405.3857, Test Loss: 9391.5770, LR: 80000.00*10^(-7)
+Losses: x: 1993.0656, y: 1693.6605, z: 5704.9694
+Epoch: 06, Train Loss: 9077.7708, Test Loss: 9115.9221, LR: 80000.00*10^(-7)
+Losses: x: 1605.3155, y: 1804.7260, z: 5705.8805
+Epoch: 07, Train Loss: 2328801.2417, Test Loss: 17138.0702, LR: 80000.00*10^(-7)
+Losses: x: 5705.4419, y: 5719.4297, z: 5713.1985
+Epoch: 08, Train Loss: 17513.9894, Test Loss: 17124.5642, LR: 40000.00*10^(-7)
+Losses: x: 5705.4427, y: 5713.4202, z: 5705.7015
+Epoch: 01, Train Loss: 17126.2821, Test Loss: 17153.6669, LR: 2000.00*10^(-7)
+Losses: x: 5719.9967, y: 5717.2575, z: 5716.8040
+Epoch: 02, Train Loss: 17091.5571, Test Loss: 16826.3839, LR: 4000.00*10^(-7)
+Losses: x: 5529.1782, y: 5692.2926, z: 5604.9421
+Epoch: 03, Train Loss: 13741.0496, Test Loss: 6110.9848, LR: 6000.00*10^(-7)
+Losses: x: 1849.0326, y: 2077.1684, z: 2184.7876
+Epoch: 04, Train Loss: 7014.3012, Test Loss: 4939.7488, LR: 8000.00*10^(-7)
+Losses: x: 1579.1426, y: 1680.4734, z: 1680.1362
+Epoch: 05, Train Loss: 6095.5157, Test Loss: 3966.1533, LR: 10000.00*10^(-7)
+Losses: x: 1325.0855, y: 1315.8228, z: 1325.2483
+Epoch: 06, Train Loss: 5631.2853, Test Loss: 4163.5474, LR: 10000.00*10^(-7)
+Losses: x: 1320.6298, y: 1533.8335, z: 1309.0841
+Epoch: 07, Train Loss: 5327.6271, Test Loss: 4308.7276, LR: 10000.00*10^(-7)
+Losses: x: 1379.1784, y: 1429.3238, z: 1500.2253
+Epoch: 08, Train Loss: 5088.1039, Test Loss: 3323.9322, LR: 5000.00*10^(-7)
+Losses: x: 1063.3799, y: 1112.9419, z: 1147.6102
+Epoch: 09, Train Loss: 4981.7142, Test Loss: 3519.6121, LR: 5000.00*10^(-7)
+Losses: x: 1116.4033, y: 1179.5918, z: 1223.6170
+Epoch: 10, Train Loss: 4919.1702, Test Loss: 3307.2770, LR: 5000.00*10^(-7)
+Losses: x: 1066.6840, y: 1112.9942, z: 1127.5988
+Epoch: 11, Train Loss: 4813.7778, Test Loss: 3063.2554, LR: 2500.00*10^(-7)
+Losses: x: 990.3092, y: 1031.0392, z: 1041.9070
+Epoch: 12, Train Loss: 4764.4177, Test Loss: 3211.9754, LR: 2500.00*10^(-7)
+Losses: x: 1043.5622, y: 1077.8282, z: 1090.5850
+Epoch: 13, Train Loss: 4723.9972, Test Loss: 3013.0187, LR: 2500.00*10^(-7)
+Losses: x: 958.8661, y: 1011.1808, z: 1042.9719
+Epoch: 14, Train Loss: 4675.0815, Test Loss: 2967.0780, LR: 1250.00*10^(-7)
+Losses: x: 955.9599, y: 997.0277, z: 1014.0903
+Epoch: 15, Train Loss: 4652.7633, Test Loss: 2951.5280, LR: 1250.00*10^(-7)
+Losses: x: 952.3893, y: 990.4005, z: 1008.7382
+Epoch: 16, Train Loss: 4627.3638, Test Loss: 2954.7486, LR: 1250.00*10^(-7)
+Losses: x: 949.5534, y: 991.1813, z: 1014.0139
+Epoch: 17, Train Loss: 4603.0797, Test Loss: 2940.4510, LR: 625.00*10^(-7)
+Losses: x: 946.8874, y: 982.6757, z: 1010.8878
+Epoch: 18, Train Loss: 4595.6304, Test Loss: 2944.4914, LR: 625.00*10^(-7)
+Losses: x: 947.0884, y: 987.6696, z: 1009.7335
+Epoch: 19, Train Loss: 4583.7047, Test Loss: 2944.5411, LR: 625.00*10^(-7)
+Losses: x: 947.7646, y: 985.1192, z: 1011.6573
+Epoch: 20, Train Loss: 4565.2727, Test Loss: 2931.5968, LR: 312.50*10^(-7)
+Losses: x: 943.3531, y: 983.2645, z: 1004.9791
+Epoch: 21, Train Loss: 4562.0645, Test Loss: 2942.3964, LR: 312.50*10^(-7)
+Losses: x: 947.7654, y: 985.9070, z: 1008.7240
+Epoch: 22, Train Loss: 4553.9997, Test Loss: 2952.7628, LR: 312.50*10^(-7)
+Losses: x: 947.5186, y: 989.6699, z: 1015.5743
+Epoch: 23, Train Loss: 4547.8425, Test Loss: 2937.0897, LR: 156.25*10^(-7)
+Losses: x: 946.6120, y: 984.4046, z: 1006.0731
+Epoch: 24, Train Loss: 4541.6546, Test Loss: 2913.3155, LR: 156.25*10^(-7)
+Losses: x: 939.9586, y: 974.8983, z: 998.4586
+Epoch: 25, Train Loss: 4542.5859, Test Loss: 2897.9220, LR: 156.25*10^(-7)
+Losses: x: 932.2147, y: 971.2339, z: 994.4734
+Epoch: 26, Train Loss: 4531.8092, Test Loss: 2917.7449, LR: 78.12*10^(-7)
+Losses: x: 940.6655, y: 977.4434, z: 999.6360
+Epoch: 27, Train Loss: 4533.7486, Test Loss: 2898.5400, LR: 78.12*10^(-7)
+Losses: x: 935.2433, y: 969.2285, z: 994.0682
+Epoch: 28, Train Loss: 4528.7893, Test Loss: 2896.9900, LR: 78.12*10^(-7)
+Losses: x: 934.7709, y: 968.8537, z: 993.3654
+Epoch: 29, Train Loss: 4531.7707, Test Loss: 2943.1545, LR: 39.06*10^(-7)
+Losses: x: 945.3291, y: 988.6934, z: 1009.1321
+Epoch: 30, Train Loss: 4527.5330, Test Loss: 2905.1169, LR: 39.06*10^(-7)
+Losses: x: 935.5215, y: 973.3903, z: 996.2051
+Epoch: 01, Train Loss: 11792.4270, Test Loss: 11831.8662, LR: 2000.00*10^(-7)
+Losses: x: 3945.1364, y: 3977.3046, z: 3910.6756
+Epoch: 02, Train Loss: 11765.9706, Test Loss: 11829.8035, LR: 4000.00*10^(-7)
+Losses: x: 3945.3061, y: 3977.1642, z: 3909.3108

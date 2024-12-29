@@ -1,7 +1,7 @@
 import torch
-from torch.nn import Sequential, Linear, GELU, BatchNorm1d, Dropout, LayerNorm, ReLU, ModuleList, PReLU
+from torch.nn import Sequential, Linear, GELU, Dropout, ReLU, ModuleList, PReLU
 import torch.nn.functional as F
-from torch_geometric.nn import MessagePassing, GATConv, BatchNorm
+from torch_geometric.nn import MessagePassing, GATConv, BatchNorm, LayerNorm, GraphNorm
 
 class mlp(torch.nn.Module):
     """
@@ -17,16 +17,15 @@ class mlp(torch.nn.Module):
     Attributes:
         mlp (torch.nn.Sequential): The sequential container of the MLP layers.
     """
-    def __init__(self, in_channels, out_channel, hidden_dim=128, hidden_num=3, activation=PReLU(), normalize=False):
+    def __init__(self, in_channels, out_channel, hidden_dim=128, hidden_num=3, normalize=False):
         super().__init__()
-        normalization = BatchNorm(in_channels)
-        self.layers = [Linear(in_channels, hidden_dim), activation]
+        self.layers = [Linear(in_channels, hidden_dim), PReLU()]
         for _ in range(hidden_num):
             self.layers.append(Dropout(0.1))
-            self.layers.append(Linear(hidden_dim, hidden_dim))
+            self.layers.append(Linear(hidden_dim, hidden_dim, bias=False))
             if normalize:
-                self.layers.append(normalization)
-            self.layers.append(activation)
+                self.layers.append(BatchNorm(in_channels))
+            self.layers.append(PReLU())
         self.layers.append(Linear(hidden_dim, out_channel))
         self.mlp = Sequential(*self.layers)
         self._init_parameters()
@@ -35,12 +34,10 @@ class mlp(torch.nn.Module):
          for layer in self.mlp:
             if isinstance(layer, Linear):
                 torch.nn.init.xavier_uniform_(layer.weight)
-                if layer.bias is not None:
-                    torch.nn.init.zeros_(layer.bias)
 
     def forward(self, x):
             return self.mlp(x)
-    
+
 class MPLayer(MessagePassing):
     """
     A message passing layer for a graph neural network (GNN).
@@ -61,7 +58,7 @@ class MPLayer(MessagePassing):
         message(v_i, v_j, e): Constructs messages from node features and edge features.
     """
     def __init__(self, in_channels, out_channels):
-        super().__init__(aggr='mean')
+        super().__init__(aggr='sum')
         self.mlp = mlp(2*in_channels, out_channels)
 
     def forward(self, edge_index, v,  e):
@@ -69,7 +66,7 @@ class MPLayer(MessagePassing):
         return accumulated_message
 
     def message(self, v_i, v_j, e):
-        return self.mlp(torch.cat([v_i - v_j, e], dim=-1))
+        return self.mlp(torch.cat([v_i * v_j, e], dim=-1))
         #return self.mlp(v_i + v_j + e)
 
 class GNN(torch.nn.Module):
@@ -95,30 +92,84 @@ class GNN(torch.nn.Module):
         Args:
             data (torch_geomatric.data.Data): Input graph.
     """
-    def __init__(self, node_dim, edge_dim, out_dim, embedding_dim=64, mp_num=3):
+    def __init__(self, node_dim, edge_dim, out_dim, embedding_dim=128, mp_num=3):
         super().__init__()
         torch.manual_seed(12345)
         self.node_encoder = mlp(node_dim, embedding_dim, hidden_num=2)
         self.edge_encoder = mlp(edge_dim, embedding_dim, hidden_num=2)
+        self.far_edge_encoder = mlp(edge_dim-3, embedding_dim, hidden_num=2)
         self.message_passing_layers = ModuleList()
-        self.norm_layer = BatchNorm(embedding_dim)
+        self.norm_layer = GraphNorm(embedding_dim)
         for _ in range(mp_num):
-            self.message_passing_layers.append(BatchNorm(embedding_dim))
+            self.message_passing_layers.append(GraphNorm(embedding_dim))
             self.message_passing_layers.append(MPLayer(embedding_dim, embedding_dim))
-        self.decoder = mlp(embedding_dim, out_dim, hidden_num=1, normalize=False)
+        self.decoder = mlp(embedding_dim, out_dim, hidden_num=2, normalize=False)
         
         
     def forward(self, data):
         v = self.node_encoder(data.x)
         e = self.edge_encoder(data.edge_attr)
-        e = self.norm_layer(e)
+        far_e = self.far_edge_encoder(data.edge_attr[:,3:])
         
+        first = True
         for layer in self.message_passing_layers:
             if isinstance(layer, MPLayer):
-                v = v + layer(data.edge_index, v, e)  # Residual connection
+                if first:
+                    v = layer(data.edge_index, v, e)
+                    first = False
+                else:
+                    v = v + layer(data.edge_index, v, far_e)
             else:
                 v = layer(v)
+
         return self.decoder(v)
+
+class equivariantMPLayer(MessagePassing):
+    def __init__(self, first=False):
+        super().__init__(aggr='sum')
+        self.mlp1 = mlp(7, 1)
+        self.mlp2 = mlp(11, 1)
+        self.first = first
+        
+    def forward(self, edge_index, v, e, direction, f=None):
+        f = self.propagate(edge_index, v=v, e=e, f=f, direction=direction)
+        return f
+    
+    def message(self, v_i, v_j, e, direction, f_j):
+        if self.first:
+            f = self.mlp1(torch.cat([v_i * v_j, e], dim=-1))
+            return torch.cat([f * direction, f], dim=-1)
+        else:
+            f = self.mlp2(torch.cat([v_i, v_j, e, f_j], dim=-1))
+            return torch.cat([f * direction, f], dim=-1)
+        
+
+class equivariantGNN(torch.nn.Module):
+    def __init__(self, embedding_dim=128, mp_num=3):
+        super().__init__()
+        self.message_passing_layers = ModuleList([GraphNorm(embedding_dim), equivariantMPLayer(first=True)])
+        for _ in range(mp_num-1):
+            self.message_passing_layers.append(GraphNorm(embedding_dim))
+            self.message_passing_layers.append(equivariantMPLayer())
+                
+    def forward(self, data):
+        v = data.x
+        e = data.edge_attr[:,:4]
+        distance = data.edge_attr[:,3]
+        direction = data.edge_attr[:,4:]
+        
+        first = True
+        for layer in self.message_passing_layers:
+            if isinstance(layer, equivariantMPLayer):
+                if first:
+                    f = layer(data.edge_index, v, e, direction)
+                    first = False
+                else:
+                    f = f + layer(data.edge_index, v, distance, direction, f)
+            else:
+                pass
+                #v = layer(v)
+        return f[:,:3]
 
 class GATModel(torch.nn.Module):
     def __init__(self, node_dim, edge_dim, out_dim, embedding_dim=32, num_layers=4, heads=8):
