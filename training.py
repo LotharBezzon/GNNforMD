@@ -110,7 +110,7 @@ def regularization_loss(pred, atom_num, batch_size):
         loss += torch.norm(torch.sum(pred[i*atom_num:(i+1)*atom_num], dim=0))
     return loss * np.sqrt(atom_num)
 
-def train(model, optimizer, loader, lossFunc):
+def train(model, optimizer, loader, lossFunc, augment=False):
     """
     Trains the model for one epoch.
 
@@ -128,7 +128,8 @@ def train(model, optimizer, loader, lossFunc):
     global batch_size
     for data in loader:
         data = data.to(device)
-        data = rotate_graph(data, torch.rand(1)*2*np.pi, torch.rand(1)*2*np.pi, torch.rand(1)*2*np.pi)
+        if augment:
+            data = rotate_graph(data, torch.rand(1)*2*np.pi, torch.rand(1)*2*np.pi, torch.rand(1)*2*np.pi)
         optimizer.zero_grad()  # Clear gradients.
         out = model(data)  # Forward pass.
         loss = lossFunc(out, data.y)  # Loss computation.
@@ -240,7 +241,7 @@ if __name__ == '__main__':
     data = read_data(files)
     print('Data read')
     
-    graphs = make_graphs(data[:1000], charges, LJ_params, cutoff=3.5)
+    graphs = make_graphs(data, charges, LJ_params, cutoff=3.5)
     print(len(graphs))
     print('Graphs made')
 
@@ -253,6 +254,7 @@ if __name__ == '__main__':
     print('Data loaded')
 
     model = equivariantGNN().to(device)
+    #model = GNN(3,7,3).to(device)
     initial_lr = 1e-3
     optimizer = torch.optim.Adam(model.parameters(), lr=initial_lr)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.5)

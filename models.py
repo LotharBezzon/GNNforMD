@@ -137,11 +137,11 @@ class equivariantMPLayer(MessagePassing):
     
     def message(self, v_i, v_j, e, direction, f_j):
         if self.first:
-            f = self.mlp1(torch.cat([v_i * v_j, e], dim=-1))
-            return torch.cat([f * direction, f], dim=-1)
+            temp = self.mlp1(torch.cat([v_i * v_j, e], dim=-1))
+            return torch.cat([temp * direction, temp], dim=-1)
         else:
-            f = self.mlp2(torch.cat([v_i, v_j, e, f_j], dim=-1))
-            return torch.cat([f * direction, f], dim=-1)
+            temp = self.mlp2(torch.cat([v_i, v_j, e, f_j], dim=-1))
+            return torch.cat([temp * direction, temp], dim=-1)
         
 
 class equivariantGNN(torch.nn.Module):
@@ -155,7 +155,7 @@ class equivariantGNN(torch.nn.Module):
     def forward(self, data):
         v = data.x
         e = data.edge_attr[:,:4]
-        distance = data.edge_attr[:,3]
+        distance = data.edge_attr[:,3:4]    # the second index must be writed like this to have the correct shape
         direction = data.edge_attr[:,4:]
         
         first = True
