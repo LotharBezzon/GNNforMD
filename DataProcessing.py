@@ -149,7 +149,7 @@ def make_graphs(data, charges, LJ_params, cutoff):
         start_nodes, end_nodes = edge_index
         dist_coords, dist_mod = minimum_image_distance(positions[start_nodes], positions[end_nodes], frame['box_size'])
         
-        # Filter out edges with distances greater than 2.3
+        # Filter out edges with distances greater than cutoff
         mask = dist_mod < cutoff
         edge_index = edge_index[:, mask]
         dist_mod = dist_mod[mask]

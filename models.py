@@ -17,12 +17,12 @@ class mlp(torch.nn.Module):
     Attributes:
         mlp (torch.nn.Sequential): The sequential container of the MLP layers.
     """
-    def __init__(self, in_channels, out_channel, hidden_dim=128, hidden_num=3, normalize=False):
+    def __init__(self, in_channels, out_channel, hidden_dim=128, hidden_num=3, normalize=False, bias=False):
         super().__init__()
         self.layers = [Linear(in_channels, hidden_dim), PReLU()]
         for _ in range(hidden_num):
             self.layers.append(Dropout(0.1))
-            self.layers.append(Linear(hidden_dim, hidden_dim, bias=False))
+            self.layers.append(Linear(hidden_dim, hidden_dim, bias=bias))
             if normalize:
                 self.layers.append(BatchNorm(in_channels))
             self.layers.append(PReLU())
@@ -127,8 +127,8 @@ class GNN(torch.nn.Module):
 class equivariantMPLayer(MessagePassing):
     def __init__(self, first=False):
         super().__init__(aggr='sum')
-        self.mlp1 = mlp(7, 1)
-        self.mlp2 = mlp(11, 1)
+        self.mlp1 = mlp(7, 1, hidden_num=3, bias=False)
+        self.mlp2 = mlp(11, 1, hidden_num=4, bias=True)
         self.first = first
         
     def forward(self, edge_index, v, e, direction, f=None):
@@ -147,15 +147,15 @@ class equivariantMPLayer(MessagePassing):
 class equivariantGNN(torch.nn.Module):
     def __init__(self, embedding_dim=128, mp_num=3):
         super().__init__()
-        self.message_passing_layers = ModuleList([GraphNorm(embedding_dim), equivariantMPLayer(first=True)])
+        self.message_passing_layers = ModuleList([equivariantMPLayer(first=True)])
         for _ in range(mp_num-1):
-            self.message_passing_layers.append(GraphNorm(embedding_dim))
+            self.message_passing_layers.append(GraphNorm(4))
             self.message_passing_layers.append(equivariantMPLayer())
                 
     def forward(self, data):
         v = data.x
         e = data.edge_attr[:,:4]
-        distance = data.edge_attr[:,3:4]    # the second index must be writed like this to have the correct shape
+        distance = data.edge_attr[:,3:4]    # the second index must be like this to have the correct shape
         direction = data.edge_attr[:,4:]
         
         first = True
@@ -167,8 +167,7 @@ class equivariantGNN(torch.nn.Module):
                 else:
                     f = f + layer(data.edge_index, v, distance, direction, f)
             else:
-                pass
-                #v = layer(v)
+                f = layer(f)
         return f[:,:3]
 
 class GATModel(torch.nn.Module):

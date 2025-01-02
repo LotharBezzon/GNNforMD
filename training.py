@@ -168,8 +168,8 @@ def test(model, loader, lossFunc):
         lossy = lossFunc(pred[:, 1], data.y[:, 1])
         lossz = lossFunc(pred[:, 2], data.y[:, 2])
         count += 1
-        if count % 2 == 0:
-            print(pred[:5], data.y[:5])
+        #if count % 32 == 0:
+         #   print(pred[:5], data.y[:5])
         total_loss += loss.item()
         total_lossx += lossx.item()
         total_lossy += lossy.item()
@@ -257,7 +257,7 @@ if __name__ == '__main__':
     #model = GNN(3,7,3).to(device)
     initial_lr = 1e-3
     optimizer = torch.optim.Adam(model.parameters(), lr=initial_lr)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.5)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.9)
 
     # Load from checkpoint if available
     start_epoch = load_checkpoint(model, optimizer, 'checkpoints/big_decoder_epoch_5.pth')
