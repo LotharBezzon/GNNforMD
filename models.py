@@ -59,11 +59,12 @@ class MPLayer(MessagePassing):
     """
     def __init__(self, in_channels, out_channels):
         super().__init__(aggr='sum')
-        self.mlp = mlp(2*in_channels, out_channels)
+        self.mlp = mlp(2*in_channels, out_channels, hidden_num=2)
+        self.mlp_out = mlp(out_channels, out_channels, hidden_num=2)
 
     def forward(self, edge_index, v,  e):
         accumulated_message= self.propagate(edge_index, v=v, e=e)
-        return accumulated_message
+        return self.mlp_out(accumulated_message)
 
     def message(self, v_i, v_j, e):
         return self.mlp(torch.cat([v_i * v_j, e], dim=-1))
@@ -92,14 +93,13 @@ class GNN(torch.nn.Module):
         Args:
             data (torch_geomatric.data.Data): Input graph.
     """
-    def __init__(self, node_dim, edge_dim, out_dim, embedding_dim=128, mp_num=3):
+    def __init__(self, node_dim, edge_dim, out_dim, embedding_dim=128, mp_num=1):
         super().__init__()
         torch.manual_seed(12345)
         self.node_encoder = mlp(node_dim, embedding_dim, hidden_num=2)
         self.edge_encoder = mlp(edge_dim, embedding_dim, hidden_num=2)
         self.far_edge_encoder = mlp(edge_dim-3, embedding_dim, hidden_num=2)
         self.message_passing_layers = ModuleList()
-        self.norm_layer = GraphNorm(embedding_dim)
         for _ in range(mp_num):
             self.message_passing_layers.append(GraphNorm(embedding_dim))
             self.message_passing_layers.append(MPLayer(embedding_dim, embedding_dim))
@@ -125,10 +125,10 @@ class GNN(torch.nn.Module):
         return self.decoder(v)
 
 class equivariantMPLayer(MessagePassing):
-    def __init__(self, first=False):
+    def __init__(self, in_channels, first=False):
         super().__init__(aggr='sum')
-        self.mlp1 = mlp(7, 1, hidden_num=3, bias=False)
-        self.mlp2 = mlp(11, 1, hidden_num=4, bias=True)
+        self.mlp1 = mlp(2*in_channels, 1, hidden_num=6, bias=False, hidden_dim=96)
+        self.mlp2 = mlp(4*in_channels, 4, hidden_num=6, bias=True, hidden_dim=96)
         self.first = first
         
     def forward(self, edge_index, v, e, direction, f=None):
@@ -141,21 +141,32 @@ class equivariantMPLayer(MessagePassing):
             return torch.cat([temp * direction, temp], dim=-1)
         else:
             temp = self.mlp2(torch.cat([v_i, v_j, e, f_j], dim=-1))
-            return torch.cat([temp * direction, temp], dim=-1)
+            return temp
         
 
 class equivariantGNN(torch.nn.Module):
-    def __init__(self, embedding_dim=128, mp_num=3):
+    def __init__(self, 
+                 node_dim=3, 
+                 edge_dim=4, 
+                 embedding_dim=32, 
+                 mp_num=3,
+                 encoders_hidden_num=3):
         super().__init__()
-        self.message_passing_layers = ModuleList([equivariantMPLayer(first=True)])
+        self.node_encoder = mlp(node_dim, embedding_dim, hidden_num=encoders_hidden_num, hidden_dim=embedding_dim)
+        #self.far_node_encoder = mlp(node_dim, embedding_dim, hidden_num=encoders_hidden_num, hidden_dim=embedding_dim)
+        self.edge_encoder = mlp(edge_dim, embedding_dim, hidden_num=encoders_hidden_num, hidden_dim=embedding_dim)
+        self.far_edge_encoder = mlp(edge_dim, embedding_dim, hidden_num=encoders_hidden_num, hidden_dim=embedding_dim)
+        self.force_encoder = mlp(4, embedding_dim, hidden_num=encoders_hidden_num, hidden_dim=embedding_dim)
+        self.message_passing_layers = ModuleList([GraphNorm(embedding_dim), equivariantMPLayer(embedding_dim, first=True)])
         for _ in range(mp_num-1):
-            self.message_passing_layers.append(GraphNorm(4))
-            self.message_passing_layers.append(equivariantMPLayer())
+            self.message_passing_layers.append(GraphNorm(embedding_dim))
+            self.message_passing_layers.append(equivariantMPLayer(embedding_dim))
                 
     def forward(self, data):
-        v = data.x
-        e = data.edge_attr[:,:4]
-        distance = data.edge_attr[:,3:4]    # the second index must be like this to have the correct shape
+        v = self.node_encoder(data.x)
+        #far_v = self.far_node_encoder(data.x)
+        e = self.edge_encoder(data.edge_attr[:,:4])
+        distance = self.far_edge_encoder(data.edge_attr[:,3:])    # the second index must be like this to have the correct shape
         direction = data.edge_attr[:,4:]
         
         first = True
@@ -163,11 +174,15 @@ class equivariantGNN(torch.nn.Module):
             if isinstance(layer, equivariantMPLayer):
                 if first:
                     f = layer(data.edge_index, v, e, direction)
+                    embedded_f = self.force_encoder(f)
                     first = False
                 else:
-                    f = f + layer(data.edge_index, v, distance, direction, f)
+                    f = f + layer(data.edge_index, v, distance, direction, embedded_f)
             else:
-                f = layer(f)
+                if first:
+                    v = layer(v)
+                else:
+                    embedded_f = layer(embedded_f)
         return f[:,:3]
 
 class GATModel(torch.nn.Module):
