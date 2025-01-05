@@ -191,7 +191,7 @@ def save_checkpoint(model, optimizer, epoch, checkpoint_dir='checkpoints'):
     """
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
-    checkpoint_path = os.path.join(checkpoint_dir, f'one_mp_epoch_{epoch}.pth')
+    checkpoint_path = os.path.join(checkpoint_dir, f'mpl_out_epoch_{epoch}.pth')
     torch.save({
         'epoch': epoch,
         'model_state_dict': model.state_dict(),
@@ -237,18 +237,18 @@ def warmup_learning_rate(optimizer, warmup_steps, initial_lr):
 if __name__ == '__main__':
     charges = [None, -0.82, 0.41]
     LJ_params = [None, (0.155, 3.165), (0, 0)]
-    files = [f'data/N216.{i}.lammpstrj' for i in range(1, 101, 5)]
+    files = [f'data/N216.{i}.lammpstrj' for i in range(1, 101)]
     data = read_data(files)
     print('Data read')
     
-    graphs = make_graphs(data, charges, LJ_params, cutoff=7)
+    graphs = make_graphs(data, charges, LJ_params, cutoff=3.4)
     print(len(graphs))
     print('Graphs made')
 
     np.random.shuffle(graphs)
     test_length = int(len(graphs) / 10)
     train_graphs, test_graphs = graphs[:-test_length], graphs[-test_length:]
-    batch_size = 4
+    batch_size = 16
     train_loader = DataLoader(train_graphs, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_graphs, batch_size=batch_size)
     print('Data loaded')

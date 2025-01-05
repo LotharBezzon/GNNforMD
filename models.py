@@ -93,7 +93,7 @@ class GNN(torch.nn.Module):
         Args:
             data (torch_geomatric.data.Data): Input graph.
     """
-    def __init__(self, node_dim, edge_dim, out_dim, embedding_dim=128, mp_num=1):
+    def __init__(self, node_dim, edge_dim, out_dim, embedding_dim=128, mp_num=3):
         super().__init__()
         torch.manual_seed(12345)
         self.node_encoder = mlp(node_dim, embedding_dim, hidden_num=2)
