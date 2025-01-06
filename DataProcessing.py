@@ -9,7 +9,7 @@ def read_data(files, molecular=True):
 
     Args:
         files (list of str): List of file paths to LAMMPS trajectory files.
-        molecular (bool): False if the material is monoatomic. Default True.
+        molecular (bool): Set to False if the material is monoatomic. Default True.
 
 
     Returns:
@@ -84,10 +84,8 @@ def minimum_image_distance(coords1, coords2, box_size):
 
     Returns:
         torch.Tensor: Tensor of shape (N, 3) representing the three components of distances between each pair of coordinates.
+        torch.Tensor: Tensor of shape (N,) representing the Euclidean distances between each pair of coordinates.
     """
-    # Check if the input shapes are the same
-    if coords1.shape != coords2.shape:
-        raise ValueError(f"Shape mismatch: coords1 has shape {coords1.shape}, but coords2 has shape {coords2.shape}")
     
     delta = coords1 - coords2
     delta -= torch.round(delta / box_size) * box_size
@@ -98,9 +96,9 @@ def minimum_image_distance(coords1, coords2, box_size):
 def make_graphs(data, charges, LJ_params, cutoff):
     """
     Build graphs for a GNN architecture from the given data.
-    Nodes represent atoms and their feature is the atom type. Nodes closer than cutoff are connected.
+    Nodes represent atoms and their features are charge and LJ parameters. Only nodes closer than cutoff are connected.
     Edge attributes contain the distance between the two atoms and informations about the bond type.
-    The targets are the three force components acting on each atom. The forces are normalized.
+    The targets are the three force components acting on each atom.
 
     Args:
         data (list of dict): List of dictionaries, each containing information about a frame.
@@ -173,9 +171,6 @@ def make_graphs(data, charges, LJ_params, cutoff):
         graphs.append(Data(x=x, edge_index=edge_index, edge_attr=edge_attr))
         forces_list.append(force)
     forces = torch.stack(forces_list)
-    #forces_mean = forces.mean(dim=0, keepdim=True)
-    #forces_std = forces.std(dim=0, keepdim=True)
-    #forces = (forces - forces_mean) / forces_std
     for i, graph in enumerate(graphs):
         graph.y = forces[i]
     return graphs

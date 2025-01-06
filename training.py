@@ -191,7 +191,7 @@ def save_checkpoint(model, optimizer, epoch, checkpoint_dir='checkpoints'):
     """
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
-    checkpoint_path = os.path.join(checkpoint_dir, f'mpl_out_epoch_{epoch}.pth')
+    checkpoint_path = os.path.join(checkpoint_dir, f'argon_epoch_{epoch}.pth')
     torch.save({
         'epoch': epoch,
         'model_state_dict': model.state_dict(),
@@ -214,7 +214,7 @@ def load_checkpoint(model, optimizer, checkpoint_path):
     if os.path.isfile(checkpoint_path):
         checkpoint = torch.load(checkpoint_path)
         model.load_state_dict(checkpoint['model_state_dict'])
-        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         epoch = checkpoint['epoch']
         print(f'Checkpoint loaded from epoch {epoch}')
         return epoch
@@ -235,13 +235,23 @@ def warmup_learning_rate(optimizer, warmup_steps, initial_lr):
         param_group['lr'] = initial_lr * (epoch / warmup_steps)
 
 if __name__ == '__main__':
-    charges = [None, -0.82, 0.41]
+    '''charges = [None, -0.82, 0.41]
     LJ_params = [None, (0.155, 3.165), (0, 0)]
-    files = [f'data/N216.{i}.lammpstrj' for i in range(1, 101)]
+    files = [f'data/N216.{i}.lammpstrj' for i in range(1, 101, 5)]
     data = read_data(files)
     print('Data read')
     
     graphs = make_graphs(data, charges, LJ_params, cutoff=3.4)
+    print(len(graphs))
+    print('Graphs made')'''
+
+    charges = [None, 0]
+    LJ_params = [None, (0.2378, 3.405)]
+    files = [f'data/argon_train.lammpstrj']
+    data = read_data(files, molecular=False)
+    print('Data read')
+    
+    graphs = make_graphs(data, charges, LJ_params, cutoff=4.4)
     print(len(graphs))
     print('Graphs made')
 
@@ -255,22 +265,22 @@ if __name__ == '__main__':
 
     #model = equivariantGNN().to(device)
     model = GNN(3,7,3).to(device)
-    initial_lr = 1e-3
+    initial_lr = 1e-4
     optimizer = torch.optim.Adam(model.parameters(), lr=initial_lr)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.85)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.9)
 
     # Load from checkpoint if available
-    start_epoch = load_checkpoint(model, optimizer, 'checkpoints/big_decoder_epoch_5.pth')
-    warmup_steps = 5
+    start_epoch = load_checkpoint(model, optimizer, 'checkpoints/mpl_out_epoch_30.pth')
+    warmup_steps = 0
     test_losses = []
     train_losses = []
-    for epoch in range(start_epoch + 1, 50):
+    for epoch in range(start_epoch + 1, 61):
         lossFunc = torch.nn.L1Loss(reduction='sum')
         if epoch <= warmup_steps:
             lossFunc = warmup_loss()
             warmup_learning_rate(optimizer, warmup_steps, initial_lr)
     
-        loss = train(model, optimizer, train_loader, lossFunc)
+        loss = train(model, optimizer, train_loader, lossFunc, augment=True)
         test_loss, lossx, lossy, lossz = test(model, test_loader, lossFunc)
         test_losses.append(test_loss)
         train_losses.append(loss)
