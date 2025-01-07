@@ -1,5 +1,5 @@
 import torch
-from torch.nn import Sequential, Linear, GELU, Dropout, ReLU, ModuleList, PReLU
+from torch.nn import Sequential, Linear, Dropout, ModuleList, PReLU
 import torch.nn.functional as F
 from torch_geometric.nn import MessagePassing, GATConv, BatchNorm, LayerNorm, GraphNorm
 
@@ -12,12 +12,18 @@ class mlp(torch.nn.Module):
         out_channel (int): Number of output features.
         hidden_dim (int, optional): Number of hidden units in each hidden layer. Default is 128.
         hidden_num (int, optional): Number of hidden layers. Default is 3.
-        activation (torch.nn.Module, optional): Activation function to use. Default is GELU().
+        normalize (bool, optional): Whether to apply batch normalization. Default is False.
+        bias (bool, optional): Whether to include bias in the linear layers. Default is False.
 
     Attributes:
         mlp (torch.nn.Sequential): The sequential container of the MLP layers.
     """
-    def __init__(self, in_channels, out_channel, hidden_dim=128, hidden_num=3, normalize=False, bias=False):
+    def __init__(self, in_channels, 
+                 out_channel, 
+                 hidden_dim=128, 
+                 hidden_num=3, 
+                 normalize=False, 
+                 bias=False):
         super().__init__()
         self.layers = [Linear(in_channels, hidden_dim), PReLU()]
         for _ in range(hidden_num):
@@ -42,9 +48,9 @@ class MPLayer(MessagePassing):
     """
     A message passing layer for a graph neural network (GNN).
     .. math::
-        \mathbf{x}_i^{\prime} = \mathbf{x}_i + \left(
-        \text{mean}_{j \in \mathcal{N}(i)} \,\{\text{MLP}
-        \left((\mathbf{x}_i \, +\, \mathbf{x}_j)\, ||\, \mathbf{e}_{j,i}\right)\} \right)
+        \mathbf{x}_i^{\prime} = \text{MLP}\left(
+        \Sigma_{j \in \mathcal{N}(i)} \,\{\text{MLP}
+        \left((\mathbf{x}_i \, *\, \mathbf{x}_j)\, ||\, \mathbf{e}_{ji}\right)\} \right)
 
     Args:
         in_channels (int): Number of input features for each node.
@@ -52,6 +58,7 @@ class MPLayer(MessagePassing):
 
     Attributes:
         mlp (mlp): A multi-layer perceptron (MLP) used to process messages.
+        mlp_out (mlp): A multi-layer perceptron (MLP) used to process the aggregated messages.
 
     Methods:
         forward(edge_index, v, e): Performs the message passing and aggregation.
@@ -68,24 +75,23 @@ class MPLayer(MessagePassing):
 
     def message(self, v_i, v_j, e):
         return self.mlp(torch.cat([v_i * v_j, e], dim=-1))
-        #return self.mlp(v_i + v_j + e)
 
 class GNN(torch.nn.Module):
     """
-    A graph neural network (GNN) model with message passing layers.
+    A graph neural network (GNN) model.
 
     Args:
         node_dim (int): Number of input features for each node.
         edge_dim (int): Number of input features for each edge.
-        embedding_dim (int): Dimension of the embeddings for nodes and edges.
         out_dim (int): Number of output features.
-        mp_num (int): Number of message passing layers.
+        embedding_dim (int, optional): Dimension of the embeddings for nodes and edges. Default is 128.
+        mp_num (int, optional): Number of message passing layers. Default is 3.
 
     Attributes:
         node_encoder (mlp): MLP to encode node features.
-        edge_encoder (mlp): MLP to encode edge features.
+        edge_encoder (mlp): MLP to encode edge features for the first message passing layer.
+        far_edge_encoder (mlp): MLP to encode edge features for tother message passing layers.
         message_passing_layers (ModuleList): List of message passing layers and normalization layers.
-        norm_layer (BatchNorm1d): Batch normalization layer for edge features.
         decoder (mlp): MLP to decode the final node embeddings to output features.
 
     Methods:
@@ -125,6 +131,22 @@ class GNN(torch.nn.Module):
         return self.decoder(v)
 
 class equivariantMPLayer(MessagePassing):
+    """
+    A message passing layer for an equivariant graph neural network (GNN).
+
+    Args:
+        in_channels (int): Number of input features for each node.
+        first (bool, optional): Whether this is the first message passing layer. Default is False.
+
+    Attributes:
+        mlp1 (mlp): A multi-layer perceptron (MLP) used in the first message passing layer.
+        mlp2 (mlp): A multi-layer perceptron (MLP) used in subsequent message passing layers.
+        first (bool): Indicates whether this is the first message passing layer.
+
+    Methods:
+        forward(edge_index, v, e, direction, f=None): Performs the message passing and aggregation.
+        message(v_i, v_j, e, direction, f_j): Constructs messages from node features and edge features.
+    """
     def __init__(self, in_channels, first=False):
         super().__init__(aggr='sum')
         self.mlp1 = mlp(2*in_channels, 1, hidden_num=6, bias=False, hidden_dim=96)
@@ -145,6 +167,25 @@ class equivariantMPLayer(MessagePassing):
         
 
 class equivariantGNN(torch.nn.Module):
+    """
+    An equivariant graph neural network (GNN) model.
+
+    Args:
+        node_dim (int): Number of input features for each node.
+        edge_dim (int): Number of input features for each edge.
+        embedding_dim (int): Dimension of the embeddings for nodes and edges.
+        mp_num (int): Number of message passing layers.
+        encoders_hidden_num (int): Number of hidden layers in the node and edge encoders.
+
+    Attributes:
+        node_encoder (mlp): MLP to encode node features.
+        edge_encoder (mlp): MLP to encode edge features.
+        message_passing_layers (ModuleList): List of message passing layers.
+        decoder (mlp): MLP to decode the final node embeddings to output features.
+
+    Methods:
+        forward(data): Forward pass of the GNN model.
+    """
     def __init__(self, 
                  node_dim=3, 
                  edge_dim=4, 
