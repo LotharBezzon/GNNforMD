@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>DataProcessing module &#8212; GNN for MD  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-DataProcessing">
+<span id="dataprocessing-module"></span><h1>DataProcessing module<a class="headerlink" href="#module-DataProcessing" title="Link to this heading">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="DataProcessing.make_graphs">
+<span class="sig-prename descclassname"><span class="pre">DataProcessing.</span></span><span class="sig-name descname"><span class="pre">make_graphs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">charges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LJ_params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#DataProcessing.make_graphs" title="Link to this definition">¶</a></dt>
+<dd><p>Build graphs for a GNN architecture from the given data.
+Nodes represent atoms and their feature is the atom type. Nodes closer than cutoff are connected.
+Edge attributes contain the distance between the two atoms and informations about the bond type.
+The targets are the three force components acting on each atom. The forces are normalized.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>list</em><em> of </em><em>dict</em>) – <p>List of dictionaries, each containing information about a frame.
+Each dictionary has the following keys:
+- ‘timestep’: The timestep of the frame.
+- ‘num_atoms’: The number of atoms in the frame.
+- ‘box_size’: The size of the simulation box.
+- ‘atoms’: A list of dictionaries, each containing information about an atom.</p>
+<blockquote>
+<div><p>Each atom dictionary has the following keys:
+- ‘id’: Atom ID (0-based indexing).
+- ‘mol’: Molecule ID.
+- ‘type’: Atom type.
+- ‘x’: x-coordinate.
+- ‘y’: y-coordinate.
+- ‘z’: z-coordinate.
+- ‘fx’: Force in the x-direction.
+- ‘fy’: Force in the y-direction.
+- ‘fz’: Force in the z-direction.</p>
+</div></blockquote>
+</p></li>
+<li><p><strong>charges</strong> (<em>list</em><em> or </em><em>dict</em>) – charge or partial charge of each atom type.</p></li>
+<li><p><strong>LJ_params</strong> (<em>list</em><em> or </em><em>dict</em>) – Lennard-Jones potentials (ε and σ) for each atom type.</p></li>
+<li><p><strong>cutoff</strong> (<em>float</em>) – cutoff radius for edges length.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of graph data objects for the GNN architecture.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of torch_geometric.data.Data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="DataProcessing.minimum_image_distance">
+<span class="sig-prename descclassname"><span class="pre">DataProcessing.</span></span><span class="sig-name descname"><span class="pre">minimum_image_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#DataProcessing.minimum_image_distance" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the minimum image distance between two sets of coordinates considering periodic boundary conditions. Coordinates are assued to be cartesian!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coords1</strong> (<em>torch.Tensor</em>) – Tensor of shape (N, 3) representing the first set of coordinates.</p></li>
+<li><p><strong>coords2</strong> (<em>torch.Tensor</em>) – Tensor of shape (N, 3) representing the second set of coordinates.</p></li>
+<li><p><strong>box_size</strong> (<em>torch.Tensor</em><em> or </em><em>float</em>) – Size of the periodic box.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tensor of shape (N, 3) representing the three components of distances between each pair of coordinates.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="DataProcessing.read_data">
+<span class="sig-prename descclassname"><span class="pre">DataProcessing.</span></span><span class="sig-name descname"><span class="pre">read_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecular</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#DataProcessing.read_data" title="Link to this definition">¶</a></dt>
+<dd><p>Reads data from a list of LAMMPS trajectory files and extracts atom information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files</strong> (<em>list</em><em> of </em><em>str</em>) – List of file paths to LAMMPS trajectory files.</p></li>
+<li><p><strong>molecular</strong> (<em>bool</em>) – False if the material is monoatomic. Default True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl>
+<dt>A list of dictionaries, each containing information about a frame.</dt><dd><p>Each dictionary has the following keys:
+- ‘timestep’: The timestep of the frame.
+- ‘num_atoms’: The number of atoms in the frame.
+- ‘box_size’: The size of the simulation box.
+- ‘atoms’: A list of dictionaries, each containing information about an atom.</p>
+<blockquote>
+<div><p>Each atom dictionary has the following keys:
+- ‘id’: Atom ID (0-based indexing).
+- ‘mol’: Molecule ID.
+- ‘type’: Atom type.
+- ‘x’: x-coordinate.
+- ‘y’: y-coordinate.
+- ‘z’: z-coordinate.
+- ‘fx’: Force in the x-direction.
+- ‘fy’: Force in the y-direction.
+- ‘fz’: Force in the z-direction.</p>
+</div></blockquote>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">GNN for MD</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Lothar Bezzon.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/DataProcessing.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
