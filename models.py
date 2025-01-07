@@ -99,12 +99,17 @@ class GNN(torch.nn.Module):
         Args:
             data (torch_geomatric.data.Data): Input graph.
     """
-    def __init__(self, node_dim, edge_dim, out_dim, embedding_dim=128, mp_num=3):
+    def __init__(self, 
+                 node_dim, 
+                 edge_dim, 
+                 out_dim, 
+                 embedding_dim=128, 
+                 mp_num=3):
         super().__init__()
         torch.manual_seed(12345)
         self.node_encoder = mlp(node_dim, embedding_dim, hidden_num=2)
         self.edge_encoder = mlp(edge_dim, embedding_dim, hidden_num=2)
-        self.far_edge_encoder = mlp(edge_dim-3, embedding_dim, hidden_num=2)
+        self.far_edge_encoder = mlp(edge_dim-3, embedding_dim, hidden_num=2)   # Does not include bond type
         self.message_passing_layers = ModuleList()
         for _ in range(mp_num):
             self.message_passing_layers.append(GraphNorm(embedding_dim))
@@ -124,7 +129,7 @@ class GNN(torch.nn.Module):
                     v = layer(data.edge_index, v, e)
                     first = False
                 else:
-                    v = v + layer(data.edge_index, v, far_e)
+                    v = v + layer(data.edge_index, v, far_e)    # Residual connection
             else:
                 v = layer(v)
 
@@ -159,8 +164,8 @@ class equivariantMPLayer(MessagePassing):
     
     def message(self, v_i, v_j, e, direction, f_j):
         if self.first:
-            temp = self.mlp1(torch.cat([v_i * v_j, e], dim=-1))
-            return torch.cat([temp * direction, temp], dim=-1)
+            temp = self.mlp1(torch.cat([v_i * v_j, e], dim=-1))    # temp is the force modulus
+            return torch.cat([temp * direction, temp], dim=-1)     # return the force vector and the modulus (to learn surrounding atoms)
         else:
             temp = self.mlp2(torch.cat([v_i, v_j, e, f_j], dim=-1))
             return temp
@@ -227,6 +232,9 @@ class equivariantGNN(torch.nn.Module):
         return f[:,:3]
 
 class GATModel(torch.nn.Module):
+    """
+    A graph attention network (GAT) model. Didn't show great performance and is still quite raw.
+    """
     def __init__(self, node_dim, edge_dim, out_dim, embedding_dim=32, num_layers=4, heads=8):
         super(GATModel, self).__init__()
         self.node_encoder = mlp(node_dim, embedding_dim, hidden_dim=embedding_dim, hidden_num=1)

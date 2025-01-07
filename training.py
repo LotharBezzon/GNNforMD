@@ -65,6 +65,9 @@ def rotate_graph(data, yaw, pitch, roll):
     return Data(x=data.x, edge_index=data.edge_index, edge_attr=edge_attr, y=y)
 
 class warmup_loss(torch.nn.Module):
+    """
+    Loss function used during warm-up training. Combines true loss with a loss which penalizes small forces to get out of local minima.
+    """
     def __init__(self):
         super().__init__()
 
@@ -73,19 +76,7 @@ class warmup_loss(torch.nn.Module):
 
 class my_loss(torch.nn.Module):
     """
-    Custom loss function module that combines L1 loss with a regularization loss.
-
-    Methods:
-        forward(pred, target, atom_num, batch_size): Computes the combined loss.
-
-    Args:
-        pred (Tensor): Predicted values.
-        target (Tensor): Target values.
-        atom_num (int): Number of atoms in each graph.
-        batch_size (int): Number of graphs in the batch.
-
-    Returns:
-        Tensor: The computed loss value.
+    Custom loss function module that combines L1 loss with a regularization loss. Not used in the final model.
     """
     def __init__(self):
         super().__init__()
@@ -95,15 +86,7 @@ class my_loss(torch.nn.Module):
 
 def regularization_loss(pred, atom_num, batch_size):
     """
-    Computes a loss proportional to the total net force on the system.
-
-    Args:
-        pred (Tensor): Predicted values.
-        atom_num (int): Number of atoms in each graph.
-        batch_size (int): Number of graphs in the batch.
-
-    Returns:
-        Tensor: The computed regularization loss value.
+    Computes a loss proportional to the total net force on the system. Not used in the final model.
     """
     loss = 0
     for i in range(batch_size):     # Needed to 'unbatch' the graphs
@@ -119,6 +102,7 @@ def train(model, optimizer, loader, lossFunc, augment=False):
         optimizer (torch.optim.Optimizer): The optimizer to use for training.
         loader (DataLoader): DataLoader providing the training data.
         lossFunc (callable): The loss function to use.
+        augment (bool, optional): Whether to augment the data with random rotations. Default is False.
 
     Returns:
         float: The average loss over the training dataset.
@@ -152,7 +136,11 @@ def test(model, loader, lossFunc):
         lossFunc (callable): The loss function to use.
 
     Returns:
-        float: The average loss over the test dataset.
+        tuple: A tuple containing the following elements:
+            - float: The average loss over the test dataset.
+            - float: The average loss in the x-direction over the test dataset.
+            - float: The average loss in the y-direction over the test dataset.
+            - float: The average loss in the z-direction over the test dataset.
     """
     model.eval()
     total_loss = 0
@@ -214,7 +202,7 @@ def load_checkpoint(model, optimizer, checkpoint_path):
     if os.path.isfile(checkpoint_path):
         checkpoint = torch.load(checkpoint_path)
         model.load_state_dict(checkpoint['model_state_dict'])
-        #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         epoch = checkpoint['epoch']
         print(f'Checkpoint loaded from epoch {epoch}')
         return epoch
@@ -224,7 +212,7 @@ def load_checkpoint(model, optimizer, checkpoint_path):
     
 def warmup_learning_rate(optimizer, warmup_steps, initial_lr):
     """
-    Gradually increases the learning rate from a small value to the initial learning rate.
+    Linearly increases the learning rate from a small value to the initial learning rate.
 
     Args:
         optimizer (torch.optim.Optimizer): The optimizer to adjust the learning rate for.
@@ -265,7 +253,7 @@ if __name__ == '__main__':
 
     #model = equivariantGNN().to(device)
     model = GNN(3,7,3).to(device)
-    initial_lr = 1e-4
+    initial_lr = 1e-3
     optimizer = torch.optim.Adam(model.parameters(), lr=initial_lr)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.9)
 

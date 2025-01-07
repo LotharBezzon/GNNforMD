@@ -1,7 +1,10 @@
+import sys
+import os
 import unittest
 import torch
 from torch_geometric.data import Data
-from DataProcessing import make_graphs
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from DataProcessing import make_graphs, read_data, minimum_image_distance
 
 class TestMakeGraphs(unittest.TestCase):
 
@@ -49,6 +52,21 @@ class TestMakeGraphs(unittest.TestCase):
         graph = graphs[0]
         expected_features = torch.tensor([[1.0, 0.1, 0.2], [-1.0, 0.3, 0.4]], dtype=torch.float)
         self.assertTrue(torch.equal(graph.x, expected_features))
+
+class TestMinimumImageDistance(unittest.TestCase):
+
+    def test_minimum_image_distance(self):
+        coords1 = torch.tensor([[1.0, 1.0, 1.0], [2.0, 2.0, 2.0]], dtype=torch.float)
+        coords2 = torch.tensor([[2.0, 2.0, 2.0], [9.0, 9.0, 9.0]], dtype=torch.float)
+        box_size = torch.tensor([10.0, 10.0, 10.0], dtype=torch.float)
+
+        delta, distance = minimum_image_distance(coords1, coords2, box_size)
+
+        expected_delta = torch.tensor([[-1.0, -1.0, -1.0], [3.0, 3.0, 3.0]], dtype=torch.float)
+        expected_distance = torch.tensor([1.7321, 5.1961], dtype=torch.float)
+
+        self.assertTrue(torch.allclose(delta, expected_delta, atol=1e-4))
+        self.assertTrue(torch.allclose(distance, expected_distance, atol=1e-4))
 
 if __name__ == '__main__':
     unittest.main()
