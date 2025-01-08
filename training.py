@@ -191,7 +191,7 @@ def save_checkpoint(model, optimizer, epoch, model_name, checkpoint_dir='checkpo
     """
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
-    checkpoint_path = os.path.join(checkpoint_dir, f'{model_name}_{epoch}.pth')
+    checkpoint_path = os.path.join(checkpoint_dir, f'{model_name}_epoch_{epoch}.pth')
     torch.save({
         'epoch': epoch,
         'model_state_dict': model.state_dict(),
