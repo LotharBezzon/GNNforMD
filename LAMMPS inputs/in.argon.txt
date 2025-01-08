@@ -1,0 +1,36 @@
+units real
+
+atom_style atomic
+boundary p p p
+
+pair_style lj/cut 10.0
+
+region box block -13.14 13.14 -13.14 13.14 -13.14 13.14
+create_box 1 box
+
+# Define simulation parameters
+variable T equal 90
+variable P equal 3.0
+variable N equal 400
+
+mass 1 39.948
+pair_coeff 1 1 0.2378 3.405 10
+
+
+create_atoms 1 random $N 42 NULL overlap 2.0 maxtry 50
+
+velocity all create $T 42 dist gaussian
+
+timestep 1
+thermo 1000
+
+# Minimize energy
+#minimize 1.0e-4 1.0e-6 100 1000
+
+# Run NPT simulation
+fix 2 all npt temp 1 $T 1.0 iso $P $P 1000.0
+
+run 20000
+
+dump mydmp all custom 100 data\argon.lammpstrj id type x y z fx fy fz
+run 9999
