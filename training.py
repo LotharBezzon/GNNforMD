@@ -223,17 +223,17 @@ def warmup_learning_rate(optimizer, warmup_steps, initial_lr):
         param_group['lr'] = initial_lr * (epoch / warmup_steps)
 
 if __name__ == '__main__':
-    '''charges = [None, -0.82, 0.41]
+    charges = [None, -0.82, 0.41]
     LJ_params = [None, (0.155, 3.165), (0, 0)]
-    files = [f'data/N216.{i}.lammpstrj' for i in range(1, 101, 5)]
+    files = [f'data/N216.{i}.lammpstrj' for i in range(1, 101)]
     data = read_data(files)
     print('Data read')
     
     graphs = make_graphs(data, charges, LJ_params, cutoff=3.4)
     print(len(graphs))
-    print('Graphs made')'''
+    print('Graphs made')
 
-    charges = [None, 0]
+    '''charges = [None, 0]
     LJ_params = [None, (0.2378, 3.405)]
     files = [f'data/argon_train.lammpstrj']
     data = read_data(files, molecular=False)
@@ -241,7 +241,7 @@ if __name__ == '__main__':
     
     graphs = make_graphs(data, charges, LJ_params, cutoff=4.4)
     print(len(graphs))
-    print('Graphs made')
+    print('Graphs made')'''
 
     np.random.shuffle(graphs)
     test_length = int(len(graphs) / 10)
