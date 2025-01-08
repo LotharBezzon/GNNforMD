@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>GNNforMD &#8212; GNN for MD  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=12dfc556" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="DataProcessing module" href="DataProcessing.html" />
+    <link rel="prev" title="GNN for MD documentation" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="gnnformd">
+<h1>GNNforMD<a class="headerlink" href="#gnnformd" title="Link to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="DataProcessing.html">DataProcessing module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="DataProcessing.html#DataProcessing.make_graphs"><code class="docutils literal notranslate"><span class="pre">make_graphs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="DataProcessing.html#DataProcessing.minimum_image_distance"><code class="docutils literal notranslate"><span class="pre">minimum_image_distance()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="DataProcessing.html#DataProcessing.read_data"><code class="docutils literal notranslate"><span class="pre">read_data()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">models module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="models.html#models.GATModel"><code class="docutils literal notranslate"><span class="pre">GATModel</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.GATModel.forward"><code class="docutils literal notranslate"><span class="pre">GATModel.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#models.GNN"><code class="docutils literal notranslate"><span class="pre">GNN</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.GNN.node_encoder"><code class="docutils literal notranslate"><span class="pre">GNN.node_encoder</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.GNN.edge_encoder"><code class="docutils literal notranslate"><span class="pre">GNN.edge_encoder</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.GNN.far_edge_encoder"><code class="docutils literal notranslate"><span class="pre">GNN.far_edge_encoder</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.GNN.message_passing_layers"><code class="docutils literal notranslate"><span class="pre">GNN.message_passing_layers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.GNN.decoder"><code class="docutils literal notranslate"><span class="pre">GNN.decoder</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.GNN.forward"><code class="docutils literal notranslate"><span class="pre">GNN.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#models.MPLayer"><code class="docutils literal notranslate"><span class="pre">MPLayer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.MPLayer.mlp"><code class="docutils literal notranslate"><span class="pre">MPLayer.mlp</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.MPLayer.mlp_out"><code class="docutils literal notranslate"><span class="pre">MPLayer.mlp_out</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.MPLayer.forward"><code class="docutils literal notranslate"><span class="pre">MPLayer.forward()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.MPLayer.message"><code class="docutils literal notranslate"><span class="pre">MPLayer.message()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#models.equivariantGNN"><code class="docutils literal notranslate"><span class="pre">equivariantGNN</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.equivariantGNN.node_encoder"><code class="docutils literal notranslate"><span class="pre">equivariantGNN.node_encoder</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.equivariantGNN.edge_encoder"><code class="docutils literal notranslate"><span class="pre">equivariantGNN.edge_encoder</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.equivariantGNN.message_passing_layers"><code class="docutils literal notranslate"><span class="pre">equivariantGNN.message_passing_layers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.equivariantGNN.decoder"><code class="docutils literal notranslate"><span class="pre">equivariantGNN.decoder</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.equivariantGNN.forward"><code class="docutils literal notranslate"><span class="pre">equivariantGNN.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#models.equivariantMPLayer"><code class="docutils literal notranslate"><span class="pre">equivariantMPLayer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.equivariantMPLayer.mlp1"><code class="docutils literal notranslate"><span class="pre">equivariantMPLayer.mlp1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.equivariantMPLayer.mlp2"><code class="docutils literal notranslate"><span class="pre">equivariantMPLayer.mlp2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.equivariantMPLayer.first"><code class="docutils literal notranslate"><span class="pre">equivariantMPLayer.first</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.equivariantMPLayer.forward"><code class="docutils literal notranslate"><span class="pre">equivariantMPLayer.forward()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.equivariantMPLayer.message"><code class="docutils literal notranslate"><span class="pre">equivariantMPLayer.message()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#models.mlp"><code class="docutils literal notranslate"><span class="pre">mlp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.mlp.forward"><code class="docutils literal notranslate"><span class="pre">mlp.forward()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="training.html">training module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="training.html#training.load_checkpoint"><code class="docutils literal notranslate"><span class="pre">load_checkpoint()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="training.html#training.my_loss"><code class="docutils literal notranslate"><span class="pre">my_loss</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="training.html#training.my_loss.forward"><code class="docutils literal notranslate"><span class="pre">my_loss.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="training.html#training.regularization_loss"><code class="docutils literal notranslate"><span class="pre">regularization_loss()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="training.html#training.rotate_graph"><code class="docutils literal notranslate"><span class="pre">rotate_graph()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="training.html#training.rotation_matrix"><code class="docutils literal notranslate"><span class="pre">rotation_matrix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="training.html#training.save_checkpoint"><code class="docutils literal notranslate"><span class="pre">save_checkpoint()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="training.html#training.test"><code class="docutils literal notranslate"><span class="pre">test()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="training.html#training.train"><code class="docutils literal notranslate"><span class="pre">train()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="training.html#training.warmup_learning_rate"><code class="docutils literal notranslate"><span class="pre">warmup_learning_rate()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="training.html#training.warmup_loss"><code class="docutils literal notranslate"><span class="pre">warmup_loss</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="training.html#training.warmup_loss.forward"><code class="docutils literal notranslate"><span class="pre">warmup_loss.forward()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">GNN for MD</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">GNNforMD</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="DataProcessing.html">DataProcessing module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html">models module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="training.html">training module</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">GNN for MD documentation</a></li>
+      <li>Next: <a href="DataProcessing.html" title="next chapter">DataProcessing module</a></li>
+  </ul></li>
+</ul>
+</div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Lothar Bezzon.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.4.7</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+      |
+      <a href="_sources/modules.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
