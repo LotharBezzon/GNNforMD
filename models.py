@@ -14,9 +14,6 @@ class mlp(torch.nn.Module):
         hidden_num (int, optional): Number of hidden layers. Default is 3.
         normalize (bool, optional): Whether to apply batch normalization. Default is False.
         bias (bool, optional): Whether to include bias in the linear layers. Default is False.
-
-    Attributes:
-        mlp (torch.nn.Sequential): The sequential container of the MLP layers.
     """
     def __init__(self, in_channels, 
                  out_channel, 
@@ -42,11 +39,13 @@ class mlp(torch.nn.Module):
                 torch.nn.init.xavier_uniform_(layer.weight)
 
     def forward(self, x):
-            return self.mlp(x)
+        """Apply the MLP to the input tensor"""
+        return self.mlp(x)
 
 class MPLayer(MessagePassing):
-    """
-    A message passing layer for a graph neural network (GNN).
+    r"""
+    A message passing layer for a graph neural network (GNN). The nodes are updated as follows:
+
     .. math::
         \mathbf{x}_i^{\prime} = \text{MLP}\left(
         \Sigma_{j \in \mathcal{N}(i)} \,\{\text{MLP}
@@ -59,10 +58,6 @@ class MPLayer(MessagePassing):
     Attributes:
         mlp (mlp): A multi-layer perceptron (MLP) used to process messages.
         mlp_out (mlp): A multi-layer perceptron (MLP) used to process the aggregated messages.
-
-    Methods:
-        forward(edge_index, v, e): Performs the message passing and aggregation.
-        message(v_i, v_j, e): Constructs messages from node features and edge features.
     """
     def __init__(self, in_channels, out_channels):
         super().__init__(aggr='sum')
@@ -70,15 +65,26 @@ class MPLayer(MessagePassing):
         self.mlp_out = mlp(out_channels, out_channels, hidden_num=2)
 
     def forward(self, edge_index, v,  e):
+        r"""
+        Collects the messages, aggragates them and feeds the resulting tensor to :attr:`mlp_out`.
+
+        Args:
+            edge_index (Tensor): The edge indices.
+            v (Tensor): The (encoded) node features.
+            e (Tensor): The (encoded) edge features.
+        """
         accumulated_message= self.propagate(edge_index, v=v, e=e)
         return self.mlp_out(accumulated_message)
 
     def message(self, v_i, v_j, e):
+        """
+        Multiplies :obj:`"v_i"` and :obj:`"v_j"`, concatenates the rsult by :obj:`"e"` and feeds the result to :attr:`mlp`.
+        """
         return self.mlp(torch.cat([v_i * v_j, e], dim=-1))
 
 class GNN(torch.nn.Module):
-    """
-    A graph neural network (GNN) model.
+    r"""
+    A graph neural network (GNN) model to predict forces acting on an ensemble of atoms.
 
     Args:
         node_dim (int): Number of input features for each node.
@@ -93,11 +99,6 @@ class GNN(torch.nn.Module):
         far_edge_encoder (mlp): MLP to encode edge features for tother message passing layers.
         message_passing_layers (ModuleList): List of message passing layers and normalization layers.
         decoder (mlp): MLP to decode the final node embeddings to output features.
-
-    Methods:
-        forward(data): Forward pass of the GNN model.
-        Args:
-            data (torch_geomatric.data.Data): Input graph.
     """
     def __init__(self, 
                  node_dim, 
@@ -118,6 +119,12 @@ class GNN(torch.nn.Module):
         
         
     def forward(self, data):
+        r"""
+        The forward pass of the module
+
+        Args:
+            data (Data): The input graph.
+            """
         v = self.node_encoder(data.x)
         e = self.edge_encoder(data.edge_attr)
         far_e = self.far_edge_encoder(data.edge_attr[:,3:])
@@ -147,10 +154,6 @@ class equivariantMPLayer(MessagePassing):
         mlp1 (mlp): A multi-layer perceptron (MLP) used in the first message passing layer.
         mlp2 (mlp): A multi-layer perceptron (MLP) used in subsequent message passing layers.
         first (bool): Indicates whether this is the first message passing layer.
-
-    Methods:
-        forward(edge_index, v, e, direction, f=None): Performs the message passing and aggregation.
-        message(v_i, v_j, e, direction, f_j): Constructs messages from node features and edge features.
     """
     def __init__(self, in_channels, first=False):
         super().__init__(aggr='sum')
@@ -159,6 +162,7 @@ class equivariantMPLayer(MessagePassing):
         self.first = first
         
     def forward(self, edge_index, v, e, direction, f=None):
+        """The forward pass of the module"""
         f = self.propagate(edge_index, v=v, e=e, f=f, direction=direction)
         return f
     
@@ -187,9 +191,6 @@ class equivariantGNN(torch.nn.Module):
         edge_encoder (mlp): MLP to encode edge features.
         message_passing_layers (ModuleList): List of message passing layers.
         decoder (mlp): MLP to decode the final node embeddings to output features.
-
-    Methods:
-        forward(data): Forward pass of the GNN model.
     """
     def __init__(self, 
                  node_dim=3, 
@@ -209,6 +210,7 @@ class equivariantGNN(torch.nn.Module):
             self.message_passing_layers.append(equivariantMPLayer(embedding_dim))
                 
     def forward(self, data):
+        """The forward pass of the module"""
         v = self.node_encoder(data.x)
         #far_v = self.far_node_encoder(data.x)
         e = self.edge_encoder(data.edge_attr[:,:4])
@@ -248,6 +250,7 @@ class GATModel(torch.nn.Module):
         
 
     def forward(self, data):
+        """The forward pass of the module"""
         v = self.node_encoder(data.x)
         e = self.edge_encoder(data.edge_attr)
         

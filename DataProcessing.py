@@ -4,30 +4,43 @@ import torch
 import torch.nn.functional as Func
 
 def read_data(files, molecular=True):
-    """
+    r"""
     Reads data from a list of LAMMPS trajectory files and extracts atom information.
 
     Args:
         files (list of str): List of file paths to LAMMPS trajectory files.
-        molecular (bool): Set to False if the material is monoatomic. Default True.
+        molecular (bool): Set to :obj:`False` if the material is monoatomic. Default :obj:`True`.
 
 
     Returns:
         list of dict: A list of dictionaries, each containing information about a frame.
                       Each dictionary has the following keys:
+                      
                       - 'timestep': The timestep of the frame.
+                      
                       - 'num_atoms': The number of atoms in the frame.
+                      
                       - 'box_size': The size of the simulation box.
+                      
                       - 'atoms': A list of dictionaries, each containing information about an atom.
                                 Each atom dictionary has the following keys:
+                                
                                 - 'id': Atom ID (0-based indexing).
+                                
                                 - 'mol': Molecule ID.
+                                
                                 - 'type': Atom type.
+                                
                                 - 'x': x-coordinate.
+                                
                                 - 'y': y-coordinate.
+                                
                                 - 'z': z-coordinate.
+                                
                                 - 'fx': Force in the x-direction.
+                                
                                 - 'fy': Force in the y-direction.
+                                
                                 - 'fz': Force in the z-direction.
     """
     data = []
@@ -74,7 +87,7 @@ def read_data(files, molecular=True):
 
 # To account for periodic boundary conditions
 def minimum_image_distance(coords1, coords2, box_size):
-    """
+    r"""
     Calculate the minimum image distance between two sets of coordinates considering periodic boundary conditions. Coordinates are assued to be cartesian!
 
     Args:
@@ -83,8 +96,10 @@ def minimum_image_distance(coords1, coords2, box_size):
         box_size (torch.Tensor or float): Size of the periodic box.
 
     Returns:
-        torch.Tensor: Tensor of shape (N, 3) representing the three components of distances between each pair of coordinates.
-        torch.Tensor: Tensor of shape (N,) representing the Euclidean distances between each pair of coordinates.
+        tuple:
+            - Tensor of shape (N, 3) representing the three components of distances between each pair of coordinates.
+        
+            - Tensor of shape (N,) representing the Euclidean distances between each pair of coordinates.
     """
     
     delta = coords1 - coords2
@@ -103,19 +118,32 @@ def make_graphs(data, charges, LJ_params, cutoff):
     Args:
         data (list of dict): List of dictionaries, each containing information about a frame.
                              Each dictionary has the following keys:
+
                              - 'timestep': The timestep of the frame.
+
                              - 'num_atoms': The number of atoms in the frame.
+                             
                              - 'box_size': The size of the simulation box.
+                             
                              - 'atoms': A list of dictionaries, each containing information about an atom.
                                        Each atom dictionary has the following keys:
+                                       
                                        - 'id': Atom ID (0-based indexing).
+                                       
                                        - 'mol': Molecule ID.
+                                       
                                        - 'type': Atom type.
+                                       
                                        - 'x': x-coordinate.
+                                       
                                        - 'y': y-coordinate.
+                                       
                                        - 'z': z-coordinate.
+                                       
                                        - 'fx': Force in the x-direction.
+                                       
                                        - 'fy': Force in the y-direction.
+                                       
                                        - 'fz': Force in the z-direction.
         charges (list or dict): charge or partial charge of each atom type.
         LJ_params (list or dict): Lennard-Jones potentials (\u03B5 and \u03C3) for each atom type.
