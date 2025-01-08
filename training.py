@@ -164,7 +164,19 @@ def test(model, loader, lossFunc):
         total_lossz += lossz.item()
     return total_loss / len(loader.dataset), total_lossx / len(loader.dataset), total_lossy / len(loader.dataset), total_lossz / len(loader.dataset)
 
-def save_checkpoint(model, optimizer, epoch, checkpoint_dir='checkpoints'):
+def confirm_overwrite(func):
+    def wrapper(*args, **kwargs):
+        filepath = os.path.join(kwargs.get('checkpoint_dir', 'checkpoints'), f'{kwargs.get("model_name")}_epoch_{kwargs.get("epoch")}.pth')
+        if os.path.exists(filepath):
+            confirm = input(f"The file '{filepath}' already exists. Do you want to overwrite it? (y/n): ")
+            if confirm.lower() != 'y':
+                print("Operation cancelled.")
+                return
+        return func(*args, **kwargs)
+    return wrapper
+
+@confirm_overwrite
+def save_checkpoint(model, optimizer, epoch, model_name, checkpoint_dir='checkpoints'):
     """
     Saves the model and optimizer state to a checkpoint file.
 
@@ -179,7 +191,7 @@ def save_checkpoint(model, optimizer, epoch, checkpoint_dir='checkpoints'):
     """
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
-    checkpoint_path = os.path.join(checkpoint_dir, f'argon_epoch_{epoch}.pth')
+    checkpoint_path = os.path.join(checkpoint_dir, f'{model_name}_{epoch}.pth')
     torch.save({
         'epoch': epoch,
         'model_state_dict': model.state_dict(),
@@ -225,11 +237,11 @@ def warmup_learning_rate(optimizer, warmup_steps, initial_lr):
 if __name__ == '__main__':
     charges = [None, -0.82, 0.41]
     LJ_params = [None, (0.155, 3.165), (0, 0)]
-    files = [f'data/N216.{i}.lammpstrj' for i in range(1, 101)]
+    files = [f'data/N216.{i}.lammpstrj' for i in range(1, 101, 60)]
     data = read_data(files)
     print('Data read')
     
-    graphs = make_graphs(data, charges, LJ_params, cutoff=3.4)
+    graphs = make_graphs(data[:10], charges, LJ_params, cutoff=3.4)
     print(len(graphs))
     print('Graphs made')
 
@@ -258,7 +270,7 @@ if __name__ == '__main__':
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.9)
 
     # Load from checkpoint if available
-    start_epoch = load_checkpoint(model, optimizer, 'checkpoints/mpl_out_epoch_30.pth')
+    start_epoch = load_checkpoint(model, optimizer, 'checkpoints/none.pth')
     warmup_steps = 0
     test_losses = []
     train_losses = []
@@ -284,5 +296,6 @@ if __name__ == '__main__':
         if epoch >= warmup_steps:
             scheduler.step()
 
+        model_name = 'mpl_out'
         if epoch % 6 == 0:
-            save_checkpoint(model, optimizer, epoch)
+            save_checkpoint(model, optimizer, epoch=epoch, model_name=model_name, checkpoint_dir='checkpoints')
